@@ -26,7 +26,7 @@ function haversine(a, b, c, d){                 // metros entre (a,b) y (c,d)
 function fmtDist(m){ return m < 1000 ? Math.round(m)+' m' : (m/1000).toFixed(1)+' km'; }
 function esc(t=''){ return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-const estadoClass = e => /peligro/i.test(e) ? 'st-peligro' : /vulnerable/i.test(e) ? 'st-vulnerable' : 'st-menor';
+const estadoClass = e => /peligro/i.test(e) ? 'st-peligro' : /(vulnerable|casi amenaz)/i.test(e) ? 'st-vulnerable' : 'st-menor';
 const protLabel = {
   exclusion:  {t:'Zona de exclusión', c:'exclusion',  txt:'No desembarcar · observar desde el agua'},
   estricta:   {t:'Conservación estricta', c:'estricta', txt:'No salir del sendero habilitado'},
@@ -819,6 +819,7 @@ function openSpeciesSheet(id){
   const lugares = s.donde.map(pid => pointById(pid)).filter(Boolean).map(p => `${p.icono} ${esc(p.nombre.split('(')[0].trim())}`).join(', ');
   const num = String(LA_SPECIES.indexOf(s)+1).padStart(2,'0');
   const cred = imgCredit(s.id);
+  const d = (window.LA_DATOS || {})[s.id];
   const seenIt = isSeen(s.id);
   openSheet(`
     <div class="sheet-hero ${seenIt?'':'locked'}">
@@ -833,7 +834,11 @@ function openSpeciesSheet(id){
 
     <button class="btn ${seenIt?'':'secondary'}" id="sheetSeen">${seenIt?'✓ Lo vi — quitar':'👁 Marcar “Lo vi”'}</button>
 
+    ${d && d.datos ? `<div class="datos-grid">${d.datos.map(([ic,lab,val]) =>
+      `<div class="dato"><span class="dato-ic">${ic}</span><div><small>${esc(lab)}</small><b>${esc(val)}</b></div></div>`).join('')}</div>` : ''}
+
     <div class="detail-block"><h4>Ficha</h4><p class="muted">${esc(s.ficha)}</p></div>
+    ${d && d.curiosidad ? `<div class="sabias"><span class="sabias-ic">💡</span><div><b>¿Sabías que…?</b><p>${esc(d.curiosidad)}</p></div></div>` : ''}
     ${s.sonido?`<div class="detail-block"><h4>🔊 Sonido</h4><p class="muted">${esc(s.sonido)}</p></div>`:''}
     <div class="detail-block"><h4>📅 Mejor época</h4><p class="muted">${esc(s.mejor_epoca)}</p></div>
     <div class="detail-block"><h4>📍 Dónde verla</h4><p class="muted">${lugares}</p></div>

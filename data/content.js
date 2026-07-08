@@ -153,6 +153,127 @@ window.LA_INDICACION = {
   }
 };
 
+/* --- Datos precisos por especie (objetivos) + dato curioso ------------------ */
+/* Cada 'datos' es [icono, etiqueta, valor]. Fuente: fichas de Wikipedia/IUCN.  */
+window.LA_DATOS = {
+  'pinguino-humboldt': {
+    datos: [
+      ['📏','Tamaño','56–70 cm de alto'],
+      ['⚖️','Peso','4–5 kg'],
+      ['🍽️','Dieta','Peces pequeños: anchoveta, sardina'],
+      ['🏝️','Hábitat','Costas e islotes rocosos'],
+      ['🌎','Distribución','Costa del Pacífico de Perú y Chile'],
+      ['🛡️','Conservación','Vulnerable (UICN)']
+    ],
+    curiosidad: 'Su rebuzno, parecido al de un burro, le dio el apodo de “pájaro niño”. Bajo el agua nada a más de 30 km/h persiguiendo cardúmenes.'
+  },
+  'chungungo': {
+    datos: [
+      ['📏','Tamaño','87–115 cm (incluida la cola)'],
+      ['⚖️','Peso','3–5 kg'],
+      ['🍽️','Dieta','Crustáceos, moluscos, erizos y peces'],
+      ['🪨','Hábitat','Roqueríos expuestos al oleaje'],
+      ['🌎','Distribución','Costa del Pacífico sur de Sudamérica'],
+      ['🛡️','Conservación','En peligro (UICN)']
+    ],
+    curiosidad: 'Es la nutria más pequeña del mundo y la única que vive exclusivamente en el mar: todas sus parientes son de río.'
+  },
+  'pelicano': {
+    datos: [
+      ['📏','Tamaño','Hasta 1,5 m; ~2 m de envergadura'],
+      ['⚖️','Peso','7–8 kg'],
+      ['🍽️','Dieta','Peces, sobre todo anchoveta'],
+      ['🌊','Hábitat','Costas, caletas y roqueríos'],
+      ['🌎','Distribución','Costa del Pacífico de Perú y Chile'],
+      ['🛡️','Conservación','Casi amenazada (UICN)']
+    ],
+    curiosidad: 'Su bolsa bajo el pico funciona como una red: puede contener varios litros de agua y peces. Pesca lanzándose en picada desde el aire.'
+  },
+  'pilpilen': {
+    datos: [
+      ['📏','Tamaño','42–52 cm'],
+      ['⚖️','Peso','400–700 g'],
+      ['🍽️','Dieta','Mariscos, crustáceos y gusanos marinos'],
+      ['🏖️','Hábitat','Playas, roqueríos y estuarios'],
+      ['🌎','Distribución','Costas de América, del norte al sur'],
+      ['🛡️','Conservación','Preocupación menor (UICN)']
+    ],
+    curiosidad: 'Su pico largo y aplanado es una herramienta para abrir conchas y mariscos; por eso también se le llama “ostrero”.'
+  },
+  'garza-grande': {
+    datos: [
+      ['📏','Tamaño','80–105 cm; 1,3–1,7 m de envergadura'],
+      ['⚖️','Peso','700–1500 g'],
+      ['🍽️','Dieta','Peces, anfibios e insectos'],
+      ['💧','Hábitat','Humedales, lagunas y orillas'],
+      ['🌎','Distribución','Todos los continentes salvo la Antártida'],
+      ['🛡️','Conservación','Preocupación menor (UICN)']
+    ],
+    curiosidad: 'Caza totalmente inmóvil y lanza el cuello como un resorte. En época reproductiva le crecen largas plumas ornamentales en el lomo.'
+  },
+  'yeco': {
+    datos: [
+      ['📏','Tamaño','58–73 cm; ~1 m de envergadura'],
+      ['⚖️','Peso','1–1,5 kg'],
+      ['🍽️','Dieta','Peces (los captura buceando)'],
+      ['🌊','Hábitat','Costas, ríos y lagos'],
+      ['🌎','Distribución','Del sur de EE.UU. al sur de Sudamérica'],
+      ['🛡️','Conservación','Preocupación menor (UICN)']
+    ],
+    curiosidad: 'Sus plumas no son del todo impermeables: por eso lo ves con las alas abiertas, secándose al sol después de bucear.'
+  },
+  'quillay': {
+    datos: [
+      ['📏','Altura','Hasta 15–20 m'],
+      ['🌳','Familia','Quillajaceae'],
+      ['🏜️','Hábitat','Laderas secas y soleadas'],
+      ['🌎','Distribución','Endémico de Chile central'],
+      ['🛡️','Conservación','Preocupación menor']
+    ],
+    curiosidad: 'Su corteza es rica en saponinas: hace espuma como jabón. Hoy se usa en alimentos, cosmética e incluso como componente de vacunas modernas.'
+  },
+  'litre': {
+    datos: [
+      ['📏','Altura','2–8 m (arbusto o árbol)'],
+      ['🌿','Familia','Anacardiáceas'],
+      ['🏜️','Hábitat','Matorral y bosque esclerófilo'],
+      ['🌎','Distribución','Endémico de Chile (Coquimbo–Biobío)'],
+      ['🛡️','Conservación','Preocupación menor']
+    ],
+    curiosidad: 'A muchas personas les da alergia con solo tocarlo o dormir bajo su sombra. Es pariente cercano del mango y el pistacho.'
+  },
+  'peumo': {
+    datos: [
+      ['📏','Altura','Hasta 10–15 m'],
+      ['🌲','Familia','Lauráceas'],
+      ['🍃','Hábitat','Quebradas húmedas del matorral chileno'],
+      ['🌎','Distribución','Chile central'],
+      ['🛡️','Conservación','Preocupación menor']
+    ],
+    curiosidad: 'Sus frutos rojos son comestibles (se hacía harina de peumo) y sus hojas aromáticas tuvieron muchos usos tradicionales.'
+  },
+  'doca': {
+    datos: [
+      ['🌿','Tipo','Planta suculenta rastrera'],
+      ['🌱','Familia','Aizoáceas'],
+      ['🏖️','Hábitat','Dunas y roqueríos costeros'],
+      ['🌎','Distribución','Costas de Sudamérica'],
+      ['🛡️','Conservación','Común, no amenazada']
+    ],
+    curiosidad: 'Sus hojas carnosas guardan agua para resistir la sal y la sequía. Su fruto es comestible, de sabor agridulce.'
+  },
+  'totora': {
+    datos: [
+      ['📏','Altura','Hasta 3–4 m'],
+      ['🌾','Familia','Typhaceae'],
+      ['💧','Hábitat','Humedales y orillas de agua'],
+      ['🌎','Distribución','Amplia en zonas templadas y cálidas'],
+      ['🛡️','Conservación','Preocupación menor']
+    ],
+    curiosidad: 'Con sus tallos se tejen esteras y hasta embarcaciones, como los “caballitos de totora”. Además filtra y limpia el agua del humedal.'
+  }
+};
+
 /* --- Guía de especies locales --------------------------------------------- */
 window.LA_SPECIES = [
   {
@@ -185,7 +306,7 @@ window.LA_SPECIES = [
     cientifico: 'Pelecanus thagus',
     grupo: 'Aves marinas',
     emoji: '🦩',
-    estado: 'Preocupación menor',
+    estado: 'Casi amenazada',
     donde: ['mirador-canelo', 'punta-penablanca'],
     ficha: 'Ave grande de pico enorme con bolsa gular. Vuela en formación rasante sobre el agua y se zambulle para pescar. Común en caletas y roqueríos.',
     sonido: 'Generalmente silencioso; gruñidos en las colonias.',
