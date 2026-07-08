@@ -15,8 +15,11 @@
   <!-- ===== Cabecera ===== -->
   <header class="app-header">
     <img src="assets/logo.svg" alt="Litoral Adventure" class="brand-logo">
-    <div class="net-status" id="netStatus" title="Estado de conexión">
-      <span class="dot"></span><span id="netLabel">offline</span>
+    <div class="header-right">
+      <button id="langToggle" class="lang-toggle" aria-label="Language">EN</button>
+      <div class="net-status" id="netStatus" title="Estado de conexión">
+        <span class="dot"></span><span id="netLabel">offline</span>
+      </div>
     </div>
   </header>
 
@@ -46,7 +49,10 @@
   </nav>
 
   <script src="data/content.js"></script>
+  <script src="data/i18n-en.js"></script>
   <script src="data/species-img.js"></script>
+  <script src="data/species-audio.js"></script>
+  <script src="assets/lib/qrcode.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -40,6 +40,9 @@ body{
   border-bottom:1px solid var(--la-line);
 }
 .brand-logo{height:40px;width:auto}
+.header-right{display:flex;align-items:center;gap:8px}
+.lang-toggle{font:inherit;font-weight:700;font-size:12px;color:var(--la-deep);background:var(--la-card);border:1.5px solid var(--la-deep);border-radius:999px;padding:5px 11px;cursor:pointer}
+.lang-toggle:active{filter:brightness(.95)}
 .net-status{
   display:flex;align-items:center;gap:6px;
   font-size:12px;font-weight:600;color:var(--la-ink-2);
@@ -162,6 +165,26 @@ body{
 .log-item{display:flex;gap:12px;align-items:flex-start}
 .log-item .le{font-size:26px}
 .log-item small{color:var(--la-ink-2)}
+.log-foto{display:block;width:100%;max-width:260px;border-radius:12px;margin-top:8px;border:1px solid var(--la-line)}
+.foto-prev{margin-top:8px}
+.foto-prev img{width:100%;max-width:260px;border-radius:12px;border:1px solid var(--la-line);display:block}
+.field-form input[type=file]{width:100%;font:inherit;font-size:13px;padding:9px;border:1.5px dashed var(--la-line);border-radius:12px;background:#fff;color:var(--la-ink-2)}
+
+/* Generador de QR */
+.qr-list{display:flex;flex-direction:column;gap:14px;margin:6px 0 14px}
+.qr-item{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;background:var(--la-bg);border:1px solid var(--la-line);border-radius:14px;padding:14px}
+.qr-box{width:150px;height:150px;background:#fff;border-radius:8px;padding:6px;display:grid;place-content:center}
+.qr-box img,.qr-box canvas{display:block}
+.qr-item b{font-size:14px}
+.qr-item small{font-size:10px;color:var(--la-ink-2);word-break:break-all}
+
+@media print {
+  .app-header,.tabbar,.geo-alert,.btn-row,.net-status{display:none!important}
+  body{padding:0}
+  .sheet-backdrop{position:static;background:none}
+  .sheet{max-height:none;box-shadow:none;border-radius:0;padding:0}
+  .qr-item{break-inside:avoid;page-break-inside:avoid}
+}
 .empty{text-align:center;color:var(--la-ink-2);padding:30px 10px}
 .empty .big{font-size:40px;display:block;margin-bottom:8px}
 

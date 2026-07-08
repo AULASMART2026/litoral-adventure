@@ -1,16 +1,21 @@
 /* Litoral Adventure · Service Worker (offline-first) */
-const CACHE = 'litoral-adventure-v7';
+const CACHE = 'litoral-adventure-v9';
 const SPECIES = ['pinguino-humboldt','chungungo','pelicano','pilpilen','garza-grande','yeco','quillay','litre','peumo','doca','totora'];
+const SOUNDS = ['./assets/sounds/garza-grande.ogg','./assets/sounds/pelicano.mp3','./assets/sounds/yeco.mp3'];
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './data/content.js',
+  './data/i18n-en.js',
   './data/species-img.js',
+  './data/species-audio.js',
   './assets/logo.svg',
+  './assets/lib/qrcode.min.js',
   './manifest.webmanifest',
-  ...SPECIES.map(id => `./assets/species/${id}.jpg`)
+  ...SPECIES.map(id => `./assets/species/${id}.jpg`),
+  ...SOUNDS
 ];
 
 self.addEventListener('install', e => {
