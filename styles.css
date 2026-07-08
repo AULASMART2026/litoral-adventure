@@ -253,5 +253,8 @@ body{
 .see-btn{flex:0 0 auto;font:inherit;font-size:12px;font-weight:600;border:1.5px solid var(--la-green);color:var(--la-green);background:var(--la-card);border-radius:999px;padding:7px 12px;cursor:pointer}
 .er-species.seen .see-btn{background:var(--la-green);color:#fff;border-color:var(--la-green)}
 
+.aliento-box{max-height:0;overflow:hidden;opacity:0;transform:translateY(-6px);transition:all .35s ease;background:linear-gradient(135deg,var(--la-sun),#f7ca62);color:#3a2600;border-radius:14px;font-weight:600;font-size:14px;line-height:1.4;text-align:center}
+.aliento-box.show{max-height:140px;opacity:1;transform:translateY(0);padding:13px 16px;margin-bottom:14px;box-shadow:var(--la-shadow)}
+
 .demo-box label{display:block;font-size:13px;font-weight:600;color:var(--la-ink-2);margin-bottom:8px}
 .demo-box select{width:100%;font:inherit;font-size:14px;padding:11px 12px;border:1.5px solid var(--la-line);border-radius:12px;background:#fff;color:var(--la-ink)}

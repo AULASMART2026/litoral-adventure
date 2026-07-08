@@ -33,7 +33,11 @@ const state = {
   speciesFilter: 'todos',
   alertedNow: new Set(),   // ids de puntos ya alertados (para no repetir)
   mode: 'pie',             // 'pie' | 'bici'  (bici = radio de aviso mayor)
-  currentZone: null        // zona activa en el modo En Ruta
+  currentZone: null,       // zona activa en el modo En Ruta
+  lastPos: null,           // última posición GPS (para medir avance)
+  distAccum: 0,            // metros acumulados desde el último aliento
+  lastAliento: 0,          // timestamp del último aliento
+  lastAlientoIdx: -1       // para no repetir frase seguida
 };
 
 /* ---------- Guía por voz (text-to-speech, gratis y offline) ---------------- */
@@ -184,6 +188,8 @@ VIEWS.enruta = () => {
       <div class="progress-bar"><i style="width:${pct}%"></i></div>
     </div>
 
+    <div id="alientoBox" class="aliento-box" aria-live="polite"></div>
+
     <div id="zonePanel">${state.currentZone ? zonePanelHTML(state.currentZone) : zoneIdleHTML()}</div>
 
     <div class="card demo-box">
@@ -192,6 +198,7 @@ VIEWS.enruta = () => {
         <option value="">Elige una zona…</option>
         ${LA_POINTS.map(p=>`<option value="${p.id}">${p.icono} ${esc(p.nombre.split('(')[0].trim())}</option>`).join('')}
       </select>
+      <button class="btn secondary small" id="testAliento" style="margin-top:10px">💪 Escuchar una frase de aliento</button>
     </div>
 
     <div class="gps-readout" style="border:1px solid var(--la-line);border-radius:12px;margin-top:6px">
@@ -254,6 +261,24 @@ function updateProgress(){
   const total = LA_SPECIES.length, seen = loadCol().length;
   const head = $('.progress-head span'); if (head) head.textContent = `${seen} / ${total} especies`;
   const bar = $('.progress-bar i'); if (bar) bar.style.width = (total?Math.round(seen/total*100):0) + '%';
+}
+
+/* Aliento del guía: frase motivadora (neutra) mientras se avanza */
+function alentar(){
+  if (!LA_ALIENTO || !LA_ALIENTO.length) return;
+  let i; do { i = Math.floor(Math.random() * LA_ALIENTO.length); }
+  while (LA_ALIENTO.length > 1 && i === state.lastAlientoIdx);
+  state.lastAlientoIdx = i;
+  const frase = LA_ALIENTO[i];
+  const box = $('#alientoBox');
+  if (box){
+    box.textContent = '💪 ' + frase;
+    box.classList.add('show');
+    clearTimeout(alentar._t);
+    alentar._t = setTimeout(() => box.classList.remove('show'), 6000);
+  }
+  TTS.speak(frase);
+  state.lastAliento = Date.now();
 }
 
 /* ---- ESPECIES ---- */
@@ -388,6 +413,8 @@ AFTER.enruta = () => {
   if (vt) vt.onclick = () => { TTS.on = !TTS.on; if (!TTS.on) TTS.stop(); go('enruta'); };
   const sim = $('#simZone');
   if (sim) sim.onchange = () => { if (sim.value) enterZone(sim.value, true); };
+  const ta = $('#testAliento');
+  if (ta) ta.onclick = () => alentar();
   requestGeo();
 };
 
@@ -508,6 +535,19 @@ function onGeo(p){
   // guía virtual: narrar automáticamente al entrar a una zona (radio según modo)
   if (state.view === 'enruta' && nearest && nd <= modeRadius(nearest) && nearest.id !== state.currentZone){
     enterZone(nearest.id, true);
+  }
+
+  // aliento mientras se avanza: acumula distancia recorrida entre lecturas GPS
+  if (state.lastPos){
+    const step = haversine(state.lastPos.lat, state.lastPos.lng, state.pos.lat, state.pos.lng);
+    if (step > 3 && step < 500) state.distAccum += step;   // filtra ruido/saltos de GPS
+  }
+  state.lastPos = { lat: state.pos.lat, lng: state.pos.lng };
+
+  const fueraDeZona = !nearest || nd > modeRadius(nearest);
+  if (state.view === 'enruta' && fueraDeZona && state.distAccum >= 250 && (Date.now() - state.lastAliento) > 45000){
+    state.distAccum = 0;
+    alentar();
   }
 }
 function onGeoErr(){

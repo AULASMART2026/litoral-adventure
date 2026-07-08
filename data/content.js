@@ -226,6 +226,32 @@ window.LA_SPECIES = [
   }
 ];
 
+/* --- Frases de aliento del guía virtual ------------------------------------ */
+/* Neutras (sin marcar género). El guía las dice por voz mientras avanzas,     */
+/* solo para incentivar. Estilo cercano y motivador.                           */
+window.LA_ALIENTO = [
+  '¡Vas muy bien! Cada paso te acerca a algo nuevo.',
+  'Respira hondo el aire del mar y sigue a tu ritmo.',
+  'Paso a paso se recorre la costa. ¡Tú puedes!',
+  'Lo estás haciendo genial. Disfruta el camino.',
+  'El mejor ritmo es el tuyo. Sigue avanzando.',
+  'Cada metro cuenta. ¡Ánimo, que vas increíble!',
+  'Mira lo lejos que has llegado. ¡Sigue así!',
+  'La naturaleza te acompaña. Continúa con energía.',
+  'Un pie delante del otro y la aventura se despliega.',
+  '¡Qué bien lo haces! Hoy el litoral es tuyo.',
+  'Tómate tu tiempo: esto no es una carrera, es una experiencia.',
+  'Fuerza y calma: esa mezcla te lleva lejos.',
+  'El horizonte te espera. Sigue avanzando.',
+  'Cada zona trae una sorpresa. ¡Vamos por la siguiente!',
+  'Estás conectando con el mar y con tu propio ritmo. Sigue.',
+  '¡Ánimo! Lo mejor del camino es recorrerlo.',
+  'Tu energía se nota. Continúa disfrutando.',
+  'Escucha el mar, siente la brisa y sigue adelante.',
+  'Vas por buen camino, de verdad. ¡No te detengas!',
+  'Que nada te frene: la costa tiene mucho por mostrarte.'
+];
+
 /* --- Mareas (DEMO) -------------------------------------------------------- */
 /* ⚠️ Datos de ejemplo. En producción, cargar tabla oficial del SHOA para     */
 /*    Algarrobo/San Antonio y cachear para uso offline.                       */
