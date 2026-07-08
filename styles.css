@@ -217,6 +217,35 @@ body{
 
 .note{font-size:12px;color:var(--la-ink-2);background:#fff8e6;border:1px solid #f2e0b0;border-radius:10px;padding:10px 12px;margin-top:10px}
 
+/* ---------- Pokédex de especies ---------- */
+.dex-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.dex-card{position:relative;background:var(--la-card);border:1px solid var(--la-line);border-radius:16px;overflow:hidden;box-shadow:var(--la-shadow);cursor:pointer;display:flex;flex-direction:column}
+.dex-card:active{transform:scale(.98)}
+.dex-num{position:absolute;top:8px;left:8px;z-index:2;font-size:11px;font-weight:700;color:#fff;background:rgba(11,43,51,.55);border-radius:999px;padding:2px 8px}
+.dex-img{position:relative;aspect-ratio:1/1;background:var(--la-sand);overflow:hidden}
+.dex-img img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .3s ease}
+.dex-emoji{width:100%;height:100%;place-content:center;font-size:44px;background:var(--la-sand)}
+.dex-card.unseen .dex-img img{filter:grayscale(1) brightness(.55) contrast(.9)}
+.dex-lock{position:absolute;inset:0;display:grid;place-content:center;font-size:38px;font-weight:800;color:rgba(255,255,255,.85);background:rgba(11,43,51,.25);text-shadow:0 2px 8px rgba(0,0,0,.4)}
+.dex-name{font-size:13px;font-weight:600;text-align:center;padding:8px 6px 4px;line-height:1.2}
+.dex-card.unseen .dex-name{color:var(--la-ink-2)}
+.dex-toggle{margin:0 8px 10px;font:inherit;font-size:12px;font-weight:600;border:1.5px solid var(--la-line);background:var(--la-bg);color:var(--la-ink-2);border-radius:999px;padding:7px 8px;cursor:pointer}
+.dex-toggle.on{background:var(--la-green);color:#fff;border-color:var(--la-green)}
+
+/* hero de ficha (sheet) */
+.sheet-hero{position:relative;width:100%;aspect-ratio:16/10;border-radius:16px;overflow:hidden;background:var(--la-sand);margin-bottom:14px}
+.sheet-hero img{width:100%;height:100%;object-fit:cover;display:block}
+.sheet-hero__emoji{width:100%;height:100%;place-content:center;font-size:64px;background:var(--la-sand)}
+.sheet-hero.locked img{filter:grayscale(1) brightness(.6)}
+.sheet-hero .dex-num{font-size:12px}
+.img-credit{font-size:11px;color:var(--la-ink-2);margin-top:14px;text-align:right}
+.img-credit a{color:var(--la-deep)}
+
+/* miniatura en tarjetas de En Ruta */
+.er-thumb{width:48px;height:48px;flex:0 0 48px;border-radius:12px;overflow:hidden;background:var(--la-sand);cursor:pointer}
+.er-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.er-thumb .dex-emoji{font-size:26px}
+
 /* ---------- En Ruta (guía virtual) ---------- */
 .tab--go{color:var(--la-green)}
 .quick--go{background:linear-gradient(135deg,var(--la-green),var(--la-teal));color:#fff;border:none}

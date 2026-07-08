@@ -36,6 +36,10 @@ requieren `https://` o `localhost` (no funciona abriendo el archivo con file://)
 
 ## ✅ Qué ya funciona
 
+- **📕 Pokédex de especies**: grid con **fotos reales** (Wikimedia Commons, con
+  crédito y licencia) estilo Pokédex. Las que aún no ves salen en **silueta**;
+  botón **Lo vi / No lo vi** por especie y barra de "registradas". Fotos incluidas
+  en la app para uso offline (`assets/species/`).
 - **🎧 En Ruta (guía virtual)**: al transitar (a pie o en bici), el GPS detecta la
   zona y **narra por voz** (text-to-speech) su flora y fauna. Botón "¡Lo vi!" que
   arma tu colección con barra de progreso. Incluye **modo prueba** para simular

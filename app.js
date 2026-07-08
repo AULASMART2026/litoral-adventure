@@ -75,6 +75,12 @@ function loadCol(){ try { return JSON.parse(localStorage.getItem(COL_KEY)) || []
 function saveCol(a){ localStorage.setItem(COL_KEY, JSON.stringify(a)); }
 function isSeen(id){ return loadCol().includes(id); }
 function markSeen(id){ const c = loadCol(); if (!c.includes(id)){ c.push(id); saveCol(c); } }
+function markUnseen(id){ saveCol(loadCol().filter(x => x !== id)); }
+function toggleSeen(id){ isSeen(id) ? markUnseen(id) : markSeen(id); return isSeen(id); }
+
+/* ruta de la foto real (Wikimedia, descargada en assets/species) */
+const imgFor = id => `assets/species/${id}.jpg`;
+const imgCredit = id => (window.LA_IMG && LA_IMG[id]) || null;
 
 /* radio de geocerca según modo (en bici se avisa antes porque vas más rápido) */
 const modeRadius = pt => pt.geofence * (state.mode === 'bici' ? 2.6 : 1);
@@ -220,7 +226,10 @@ function zonePanelHTML(id){
   const flora = sp.filter(s => s.reino === 'flora');
   const cardHTML = s => `
     <div class="er-species ${isSeen(s.id)?'seen':''}">
-      <div class="species-emoji" data-openspecies="${s.id}">${s.emoji}</div>
+      <div class="er-thumb" data-openspecies="${s.id}">
+        <img src="${imgFor(s.id)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+        <span class="dex-emoji" style="display:none">${s.emoji}</span>
+      </div>
       <div style="flex:1" data-openspecies="${s.id}"><b>${esc(s.nombre)}</b><br><i style="font-size:12px;color:var(--la-ink-2)">${esc(s.cientifico)}</i></div>
       <button class="see-btn" data-see="${s.id}">${isSeen(s.id)?'✓ Visto':'👁 ¡Lo vi!'}</button>
     </div>`;
@@ -294,28 +303,48 @@ function alentar(){
   state.lastAliento = Date.now();
 }
 
-/* ---- ESPECIES ---- */
+/* ---- ESPECIES · Pokédex ---- */
 VIEWS.especies = () => {
   const grupos = ['todos', ...new Set(LA_SPECIES.map(s => s.grupo))];
   const list = LA_SPECIES.filter(s => state.speciesFilter === 'todos' || s.grupo === state.speciesFilter);
+  const total = LA_SPECIES.length, seen = loadCol().length;
+  const pct = total ? Math.round(seen/total*100) : 0;
   return `
-    <h2 class="section-title">🔍 Guía de especies</h2>
-    <p class="muted" style="margin-bottom:10px">Fauna representativa del litoral de Algarrobo. Toca una especie para ver su ficha.</p>
+    <h2 class="section-title">📕 Pokédex de especies</h2>
+    <div class="progress-card">
+      <div class="progress-head"><b>Tu registro</b><span id="dexCount">${seen} / ${total} registradas</span></div>
+      <div class="progress-bar"><i id="dexBar" style="width:${pct}%"></i></div>
+    </div>
+    <p class="muted" style="margin:2px 2px 10px">Colecciona la flora y fauna de Algarrobo. Marca <b>Lo vi</b> cuando la encuentres; las que aún no ves salen en silueta. Toca una para ver su ficha.</p>
     <div class="filter-row">
       ${grupos.map(g => `<button class="chip ${state.speciesFilter===g?'active':''}" data-filter="${esc(g)}">${g==='todos'?'Todas':esc(g)}</button>`).join('')}
     </div>
-    ${list.map(s => `
-      <div class="card species-item" data-species="${s.id}">
-        <div class="species-emoji">${s.emoji}</div>
-        <div style="flex:1">
-          <h3>${esc(s.nombre)}</h3>
-          <i>${esc(s.cientifico)}</i>
-          <div style="margin-top:6px"><span class="pill ${estadoClass(s.estado)}">${esc(s.estado)}</span></div>
-        </div>
-        <span style="color:var(--la-ink-2)">›</span>
-      </div>`).join('')}
+    <div class="dex-grid">
+      ${list.map(s => {
+        const num = String(LA_SPECIES.indexOf(s)+1).padStart(2,'0');
+        const seenIt = isSeen(s.id);
+        return `
+        <div class="dex-card ${seenIt?'seen':'unseen'}" data-species="${s.id}">
+          <span class="dex-num">#${num}</span>
+          <div class="dex-img">
+            <img src="${imgFor(s.id)}" alt="${esc(s.nombre)}" loading="lazy"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+            <span class="dex-emoji" style="display:none">${s.emoji}</span>
+            ${seenIt?'':'<span class="dex-lock">?</span>'}
+          </div>
+          <div class="dex-name">${esc(s.nombre)}</div>
+          <button class="dex-toggle ${seenIt?'on':''}" data-toggle="${s.id}">${seenIt?'✓ Lo vi':'○ No lo vi'}</button>
+        </div>`;
+      }).join('')}
+    </div>
   `;
 };
+
+function updateDexCounter(){
+  const total = LA_SPECIES.length, seen = loadCol().length;
+  const c = $('#dexCount'); if (c) c.textContent = `${seen} / ${total} registradas`;
+  const b = $('#dexBar'); if (b) b.style.width = (total?Math.round(seen/total*100):0) + '%';
+}
 
 /* ---- CUADERNO ---- */
 VIEWS.cuaderno = () => {
@@ -433,7 +462,21 @@ AFTER.enruta = () => {
 
 AFTER.especies = () => {
   $$('.chip').forEach(c => c.onclick = () => { state.speciesFilter = c.dataset.filter; go('especies'); });
-  $$('.species-item').forEach(i => i.onclick = () => openSpeciesSheet(i.dataset.species));
+  $$('.dex-card').forEach(card => card.onclick = () => openSpeciesSheet(card.dataset.species));
+  $$('[data-toggle]').forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    const on = toggleSeen(b.dataset.toggle);
+    const card = b.closest('.dex-card');
+    card.classList.toggle('seen', on);
+    card.classList.toggle('unseen', !on);
+    b.classList.toggle('on', on);
+    b.textContent = on ? '✓ Lo vi' : '○ No lo vi';
+    const imgWrap = card.querySelector('.dex-img');
+    const lock = imgWrap.querySelector('.dex-lock');
+    if (on && lock) lock.remove();
+    else if (!on && !lock){ const l = document.createElement('span'); l.className = 'dex-lock'; l.textContent = '?'; imgWrap.appendChild(l); }
+    updateDexCounter();
+  });
 };
 
 AFTER.cuaderno = () => {
@@ -607,19 +650,52 @@ function closeSheet(){ const b = $('#sheetBackdrop'); if (b) b.remove(); }
 function openSpeciesSheet(id){
   const s = LA_SPECIES.find(x => x.id === id); if (!s) return;
   const lugares = s.donde.map(pid => pointById(pid)).filter(Boolean).map(p => `${p.icono} ${esc(p.nombre.split('(')[0].trim())}`).join(', ');
+  const num = String(LA_SPECIES.indexOf(s)+1).padStart(2,'0');
+  const cred = imgCredit(s.id);
+  const seenIt = isSeen(s.id);
   openSheet(`
-    <div style="display:flex;gap:14px;align-items:center">
-      <div class="species-emoji" style="font-size:40px;width:64px;height:64px">${s.emoji}</div>
-      <div><h2>${esc(s.nombre)}</h2><i style="color:var(--la-ink-2)">${esc(s.cientifico)}</i>
-      <div style="margin-top:6px"><span class="pill ${estadoClass(s.estado)}">${esc(s.estado)}</span> <span class="pill st-menor">${esc(s.grupo)}</span></div></div>
+    <div class="sheet-hero ${seenIt?'':'locked'}">
+      <img src="${imgFor(s.id)}" alt="${esc(s.nombre)}"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+      <span class="sheet-hero__emoji" style="display:none">${s.emoji}</span>
+      <span class="dex-num">#${num}</span>
     </div>
+    <h2>${esc(s.nombre)}</h2>
+    <i style="color:var(--la-ink-2)">${esc(s.cientifico)}</i>
+    <div style="margin:8px 0"><span class="pill ${estadoClass(s.estado)}">${esc(s.estado)}</span> <span class="pill st-menor">${esc(s.grupo)}</span></div>
+
+    <button class="btn ${seenIt?'':'secondary'}" id="sheetSeen">${seenIt?'✓ Lo vi — quitar':'👁 Marcar “Lo vi”'}</button>
+
     <div class="detail-block"><h4>Ficha</h4><p class="muted">${esc(s.ficha)}</p></div>
     ${s.sonido?`<div class="detail-block"><h4>🔊 Sonido</h4><p class="muted">${esc(s.sonido)}</p></div>`:''}
     <div class="detail-block"><h4>📅 Mejor época</h4><p class="muted">${esc(s.mejor_epoca)}</p></div>
     <div class="detail-block"><h4>📍 Dónde verla</h4><p class="muted">${lugares}</p></div>
-    <div class="btn-row"><button class="btn" id="sheetLog">📖 Anotar avistamiento</button><button class="btn secondary" onclick="closeSheet()">Cerrar</button></div>
+    ${cred?`<p class="img-credit">📷 ${esc(cred.credit)}${cred.license?' · '+esc(cred.license):''} · <a href="${cred.source}" target="_blank" rel="noopener">Wikimedia Commons</a></p>`:''}
+    <div class="btn-row"><button class="btn secondary" id="sheetLog">📖 Anotar avistamiento</button><button class="btn secondary" onclick="closeSheet()">Cerrar</button></div>
   `);
+  const sb = $('#sheetSeen');
+  if (sb) sb.onclick = () => {
+    const on = toggleSeen(s.id);
+    sb.textContent = on ? '✓ Lo vi — quitar' : '👁 Marcar “Lo vi”';
+    sb.classList.toggle('secondary', !on);
+    $('.sheet-hero')?.classList.toggle('locked', !on);
+    syncDexCard(s.id);
+  };
   const b = $('#sheetLog'); if (b) b.onclick = () => { closeSheet(); go('cuaderno'); setTimeout(()=>{ const sel=$('#fSpecies'); if(sel){sel.value=s.id;} },60); };
+}
+
+/* refleja el estado ver/no-ver en la tarjeta de la Pokédex (si está en pantalla) */
+function syncDexCard(id){
+  const card = document.querySelector(`.dex-card[data-species="${id}"]`);
+  if (!card) return;
+  const on = isSeen(id);
+  card.classList.toggle('seen', on); card.classList.toggle('unseen', !on);
+  const btn = card.querySelector('[data-toggle]');
+  if (btn){ btn.classList.toggle('on', on); btn.textContent = on ? '✓ Lo vi' : '○ No lo vi'; }
+  const imgWrap = card.querySelector('.dex-img'); const lock = imgWrap.querySelector('.dex-lock');
+  if (on && lock) lock.remove();
+  else if (!on && !lock){ const l = document.createElement('span'); l.className = 'dex-lock'; l.textContent = '?'; imgWrap.appendChild(l); }
+  updateDexCounter();
 }
 
 function openPointSheet(id){

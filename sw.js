@@ -1,13 +1,16 @@
 /* Litoral Adventure · Service Worker (offline-first) */
-const CACHE = 'litoral-adventure-v3';
+const CACHE = 'litoral-adventure-v4';
+const SPECIES = ['pinguino-humboldt','chungungo','pelicano','pilpilen','garza-grande','yeco','quillay','litre','peumo','doca','totora'];
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './data/content.js',
+  './data/species-img.js',
   './assets/logo.svg',
-  './manifest.webmanifest'
+  './manifest.webmanifest',
+  ...SPECIES.map(id => `./assets/species/${id}.jpg`)
 ];
 
 self.addEventListener('install', e => {

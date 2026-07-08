@@ -197,7 +197,7 @@ window.LA_SPECIES = [
     mejor_epoca: 'Floración en primavera y verano.'
   },
   {
-    id: 'litre', nombre: 'Litre', cientifico: 'Litrea caustica',
+    id: 'litre', nombre: 'Litre', cientifico: 'Lithraea caustica',
     grupo: 'Flora nativa', emoji: '🍃', estado: 'Preocupación menor',
     donde: ['quebrada-rosas'], reino: 'flora',
     ficha: '¡Cuidado! A muchas personas les provoca alergia (ronchas) con solo tocarlo o estar bajo su sombra. Arbusto o árbol del matorral esclerófilo, de hojas coriáceas y ovaladas.',
