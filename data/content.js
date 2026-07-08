@@ -274,6 +274,52 @@ window.LA_DATOS = {
   }
 };
 
+/* --- Mini-quiz educativo por zona (refuerza cuidado y respeto) --------------- */
+window.LA_QUIZ = {
+  'isla-pinguinos': {
+    pregunta: '¿Cómo se debe observar a los pingüinos de Humboldt?',
+    opciones: ['Desde el agua, a distancia y sin desembarcar', 'Subiendo al islote para verlos de cerca', 'Acercándose a los nidos para fotografiar'],
+    correcta: 0,
+    explicacion: 'Son muy sensibles a la presencia humana: se observan desde el agua o el mirador, sin desembarcar ni acercarse a los nidos.'
+  },
+  'mirador-canelo': {
+    pregunta: '¿Qué ave sueles ver pescar lanzándose en picada frente al mirador?',
+    opciones: ['El pelícano', 'El pingüino', 'La garza grande'],
+    correcta: 0,
+    explicacion: 'El pelícano vuela rasante sobre el mar y se zambulle desde el aire para pescar anchoveta.'
+  },
+  'punta-penablanca': {
+    pregunta: '¿Cuándo es más fácil avistar al chungungo?',
+    opciones: ['Con marea baja y mar calmo', 'Al mediodía con marea alta', 'Solamente de noche'],
+    correcta: 0,
+    explicacion: 'El chungungo asoma entre las rocas sobre todo con marea baja y mar calmo, y al amanecer.'
+  },
+  'quebrada-rosas': {
+    pregunta: '¿Por qué conviene no tocar el litre?',
+    opciones: ['Puede provocar alergia en la piel', 'Es una planta en extinción', 'Sus flores son venenosas'],
+    correcta: 0,
+    explicacion: 'El litre produce alergia (ronchas) a muchas personas con solo tocarlo o estar bajo su sombra.'
+  },
+  'humedal-tunquen': {
+    pregunta: '¿Cuál es la mejor forma de cuidar el humedal?',
+    opciones: ['Quedarte en el sendero y guardar silencio', 'Entrar al agua para ver mejor las aves', 'Llevarte totoras de recuerdo'],
+    correcta: 0,
+    explicacion: 'Es de conservación estricta: quédate en el sendero, guarda silencio y no ingreses al agua ni extraigas plantas.'
+  }
+};
+
+/* --- Insignias / logros ----------------------------------------------------- */
+window.LA_LOGROS = [
+  { id:'comprometido',        icono:'🤝', titulo:'Comprometido',      desc:'Completaste la charla del guía.' },
+  { id:'primer-avistamiento', icono:'🐾', titulo:'Primer avistamiento', desc:'Registraste tu primera especie.' },
+  { id:'observador',          icono:'🔭', titulo:'Observador',        desc:'Avistaste 5 especies.' },
+  { id:'as-aves',             icono:'🦅', titulo:'As de las aves',     desc:'Avistaste todas las aves.' },
+  { id:'jardin-nativo',       icono:'🌿', titulo:'Jardín nativo',      desc:'Avistaste toda la flora.' },
+  { id:'explorador',          icono:'🧭', titulo:'Explorador',        desc:'Visitaste las 5 zonas.' },
+  { id:'sabio',               icono:'🧠', titulo:'Sabio del litoral',  desc:'Respondiste bien todos los quiz.' },
+  { id:'naturalista',         icono:'📕', titulo:'Naturalista',       desc:'Completaste la Pokédex.' }
+];
+
 /* --- Guía de especies locales --------------------------------------------- */
 window.LA_SPECIES = [
   {

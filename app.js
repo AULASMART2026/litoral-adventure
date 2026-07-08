@@ -97,6 +97,41 @@ function toggleSeen(id){ isSeen(id) ? markUnseen(id) : markSeen(id); return isSe
 const imgFor = id => `assets/species/${id}.jpg`;
 const imgCredit = id => (window.LA_IMG && LA_IMG[id]) || null;
 
+/* ---------- Zonas visitadas ---------- */
+const ZON_KEY = 'la_zonas_v1';
+function loadZonas(){ try { return JSON.parse(localStorage.getItem(ZON_KEY)) || []; } catch { return []; } }
+function addZona(id){ const z = loadZonas(); if (!z.includes(id)){ z.push(id); localStorage.setItem(ZON_KEY, JSON.stringify(z)); } }
+
+/* ---------- Quiz ---------- */
+const QUIZ_KEY = 'la_quiz_v1';
+function loadQuiz(){ try { return JSON.parse(localStorage.getItem(QUIZ_KEY)) || {}; } catch { return {}; } }
+function setQuiz(id, idx, correct){ const q = loadQuiz(); q[id] = { idx, correct }; localStorage.setItem(QUIZ_KEY, JSON.stringify(q)); }
+
+/* ---------- Logros / insignias ---------- */
+const LOG_KEY = 'la_logros_v1';
+const LOGRO_CHECK = {
+  'comprometido':        () => yaOnboarded(),
+  'primer-avistamiento': () => loadCol().length >= 1,
+  'observador':          () => loadCol().length >= 5,
+  'as-aves':             () => LA_SPECIES.filter(s => /Aves/.test(s.grupo)).every(s => isSeen(s.id)),
+  'jardin-nativo':       () => LA_SPECIES.filter(s => s.reino === 'flora').every(s => isSeen(s.id)),
+  'explorador':          () => loadZonas().length >= LA_POINTS.length,
+  'sabio':               () => { const q = loadQuiz(); return Object.keys(LA_QUIZ).every(z => q[z] && q[z].correct); },
+  'naturalista':         () => loadCol().length >= LA_SPECIES.length
+};
+const earnedLogros = () => (window.LA_LOGROS || []).filter(l => LOGRO_CHECK[l.id] && LOGRO_CHECK[l.id]()).map(l => l.id);
+function celebrarLogros(){
+  const ahora = earnedLogros();
+  let prev; try { prev = JSON.parse(localStorage.getItem(LOG_KEY)) || []; } catch { prev = []; }
+  const nuevos = ahora.filter(id => !prev.includes(id));
+  localStorage.setItem(LOG_KEY, JSON.stringify(ahora));
+  nuevos.forEach((id, i) => {
+    const l = LA_LOGROS.find(x => x.id === id);
+    if (l) setTimeout(() => celebrate(l.titulo, l.icono, '🏅 ¡Logro desbloqueado!'), 500 + i * 1700);
+  });
+  return nuevos;
+}
+
 /* radio de geocerca según modo (en bici se avisa antes porque vas más rápido) */
 const modeRadius = pt => pt.geofence * (state.mode === 'bici' ? 2.6 : 1);
 
@@ -146,6 +181,11 @@ VIEWS.inicio = () => `
     <button class="quick" data-goto="especies"><span class="ico">🔍</span><b>Guía de especies</b><small>Fauna marina y costera de Algarrobo</small></button>
     <button class="quick" data-goto="cuaderno"><span class="ico">📖</span><b>Cuaderno de campo</b><small>Registra tus avistamientos</small></button>
     <button class="quick" data-goto="travesias"><span class="ico">🐧</span><b>Travesías SUP</b><small>Reserva tu experiencia educativa</small></button>
+  </div>
+
+  <h2 class="section-title">🏅 Tus logros <span class="pill st-menor" style="font-weight:600">${earnedLogros().length}/${LA_LOGROS.length}</span></h2>
+  <div class="badge-grid">
+    ${LA_LOGROS.map(l => { const on = earnedLogros().includes(l.id); return `<div class="badge ${on?'on':'off'}"><span class="badge-ic">${on?l.icono:'🔒'}</span><b>${esc(l.titulo)}</b><small>${esc(l.desc)}</small></div>`; }).join('')}
   </div>
 
   <h2 class="section-title">🌊 Mareas de hoy <span class="pill st-menor" style="font-weight:600">demo</span></h2>
@@ -284,16 +324,47 @@ function zonePanelHTML(id){
       </div>` : ''}
       ${fauna.length?`<h4 class="er-group">🐾 Fauna aquí</h4>${fauna.map(cardHTML).join('')}`:''}
       ${flora.length?`<h4 class="er-group">🌿 Flora aquí</h4>${flora.map(cardHTML).join('')}`:''}
+      ${quizHTML(id)}
     </div>`;
+}
+
+/* Mini-quiz educativo por zona */
+function quizHTML(id){
+  const q = (window.LA_QUIZ || {})[id]; if (!q) return '';
+  const ans = loadQuiz()[id];
+  return `<div class="quiz" data-quiz="${id}">
+    <h4 class="er-group">🧠 Pon a prueba lo aprendido</h4>
+    <p class="quiz-q">${esc(q.pregunta)}</p>
+    <div class="quiz-opts">
+      ${q.opciones.map((o, idx) => {
+        let cls = ''; if (ans){ if (idx === q.correcta) cls = 'ok'; else if (ans.idx === idx) cls = 'no'; }
+        return `<button class="quiz-opt ${cls}" data-opt="${idx}"${ans?' disabled':''}>${esc(o)}</button>`;
+      }).join('')}
+    </div>
+    <div class="quiz-fb"${ans?'':' hidden'}>${ans?`<b>${ans.correct?'✅ ¡Correcto!':'💡 ¡Casi!'}</b> ${esc(q.explicacion)}`:''}</div>
+  </div>`;
+}
+function wireQuiz(root){
+  (root || document).querySelectorAll('.quiz-opt').forEach(b => b.onclick = () => {
+    const quizEl = b.closest('.quiz'); const id = quizEl.dataset.quiz; const q = LA_QUIZ[id];
+    const idx = +b.dataset.opt, correct = idx === q.correcta;
+    setQuiz(id, idx, correct);
+    quizEl.outerHTML = quizHTML(id);
+    wireQuiz(document);
+    if (correct && navigator.vibrate) navigator.vibrate(30);
+    celebrarLogros();
+  });
 }
 
 function enterZone(id, narrate){
   if (!pointById(id)) return;
+  addZona(id);
   state.currentZone = id;
   const panel = $('#zonePanel');
   if (panel){ panel.innerHTML = zonePanelHTML(id); wireZonePanel(); }
   if (narrate) TTS.speak(LA_NARRATION[id] || pointById(id).resumen);
   if (navigator.vibrate) navigator.vibrate(60);
+  celebrarLogros();
 }
 
 function wireZonePanel(){
@@ -307,8 +378,10 @@ function wireZonePanel(){
     const row = b.closest('.er-species'); if (row) row.classList.add('seen');
     updateProgress();
     if (!was){ const s = LA_SPECIES.find(x => x.id === id); celebrate(s ? s.nombre : '', s ? s.emoji : ''); }
+    celebrarLogros();
   });
   $$('[data-openspecies]').forEach(el => el.onclick = () => openSpeciesSheet(el.dataset.openspecies));
+  wireQuiz(document);
 }
 
 function updateProgress(){
@@ -574,6 +647,7 @@ function startRecorrido(){
     ov.remove();
     go('enruta');
     requestGeo();
+    celebrarLogros();
     setTimeout(() => { if (TTS.on) TTS.speak('¡Listo! Empecemos con calma. Disfruta y cuida cada rincón.'); }, 350);
   }
   function render(){
@@ -604,11 +678,11 @@ function startRecorrido(){
   render();
 }
 
-/* Celebración al descubrir una especie nueva */
-function celebrate(nombre, emoji){
+/* Celebración: especie nueva o logro desbloqueado */
+function celebrate(nombre, emoji, titulo){
   const t = document.createElement('div');
   t.className = 'celebrate';
-  t.innerHTML = `<div class="celebrate__card"><span class="celebrate__emoji">${emoji||'🎉'}</span><b>¡Nueva especie!</b><p>${esc(nombre)}</p></div>`;
+  t.innerHTML = `<div class="celebrate__card"><span class="celebrate__emoji">${emoji||'🎉'}</span><b>${esc(titulo||'¡Nueva especie!')}</b><p>${esc(nombre)}</p></div>`;
   document.body.appendChild(t);
   if (navigator.vibrate) navigator.vibrate([40,30,60]);
   requestAnimationFrame(() => t.classList.add('show'));
@@ -650,6 +724,7 @@ AFTER.especies = () => {
     else if (!on && !lock){ const l = document.createElement('span'); l.className = 'dex-lock'; l.textContent = '?'; imgWrap.appendChild(l); }
     updateDexCounter();
     if (on){ const s = LA_SPECIES.find(x => x.id === b.dataset.toggle); celebrate(s ? s.nombre : '', s ? s.emoji : ''); }
+    celebrarLogros();
   });
 };
 
@@ -853,6 +928,7 @@ function openSpeciesSheet(id){
     $('.sheet-hero')?.classList.toggle('locked', !on);
     syncDexCard(s.id);
     if (on) celebrate(s.nombre, s.emoji);
+    celebrarLogros();
   };
   const b = $('#sheetLog'); if (b) b.onclick = () => { closeSheet(); go('cuaderno'); setTimeout(()=>{ const sel=$('#fSpecies'); if(sel){sel.value=s.id;} },60); };
 }
