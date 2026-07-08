@@ -94,6 +94,25 @@ window.LA_ROUTES = [
   }
 ];
 
+/* --- Tipo de recorrido por ruta --------------------------------------------- */
+/* 'pie' = solo a pie · 'bici' = apto en bici · 'ambas' = a pie y en bici       */
+window.LA_ROUTE_TYPE = { r1: 'ambas', r2: 'pie', r3: 'bici' };
+
+/* --- Guion de narración del guía virtual (por zona) ------------------------- */
+/* Texto que la app lee en voz alta al llegar a cada zona en el modo "En Ruta". */
+window.LA_NARRATION = {
+  'isla-pinguinos':
+    'Estás frente a la Isla de los Pingüinos, un santuario de la naturaleza. En estos roqueríos anida una colonia de pingüinos de Humboldt. Obsérvalos desde el agua, con calma y a distancia: no desembarques ni te acerques a los nidos. Sobre las rocas también verás yecos, unos cormoranes negros, secando sus alas al sol.',
+  'mirador-canelo':
+    'Bienvenido al mirador El Canelo. Desde aquí tienes una vista panorámica del litoral y de la Isla de los Pingüinos. Mira hacia el mar: es común ver pelícanos volando en fila, rasando el agua antes de zambullirse a pescar.',
+  'punta-penablanca':
+    'Llegaste a Punta Peñablanca, un acantilado costero. Si el mar está calmo y con marea baja, busca entre las rocas al chungungo, una pequeña nutria marina. En la orilla podrías ver pilpilenes con su pico rojo, y en las dunas crece la doca, con sus flores moradas. Camina con cuidado y no pises los nidos en la arena.',
+  'quebrada-rosas':
+    'Entras a la Quebrada de Las Rosas, un bosque nativo esclerófilo. A tu alrededor hay quillayes, litres y peumos, árboles adaptados al clima seco de Chile central. Ojo con el litre: a algunas personas les da alergia al tocarlo. Sigue siempre el sendero habilitado para no dañar la vegetación.',
+  'humedal-tunquen':
+    'Estás en el Humedal de Tunquén, un ecosistema costero muy valioso y de conservación estricta. En sus aguas someras verás garzas grandes cazando inmóviles, y otras aves entre totoras y juncos. Mantente en el sendero y guarda silencio para no espantarlas.'
+};
+
 /* --- Guía de especies locales --------------------------------------------- */
 window.LA_SPECIES = [
   {
@@ -167,6 +186,43 @@ window.LA_SPECIES = [
     ficha: 'Ave negra que bucea para pescar y luego seca sus alas extendidas sobre las rocas. Forma colonias ruidosas en islotes.',
     sonido: 'Gruñidos guturales en la colonia.',
     mejor_epoca: 'Todo el año.'
+  },
+
+  /* --- Flora nativa --- */
+  {
+    id: 'quillay', nombre: 'Quillay', cientifico: 'Quillaja saponaria',
+    grupo: 'Flora nativa', emoji: '🌳', estado: 'Preocupación menor',
+    donde: ['quebrada-rosas'], reino: 'flora',
+    ficha: 'Árbol siempreverde emblemático del bosque esclerófilo chileno. Su corteza contiene saponinas (hace espuma) y por eso se usó como jabón natural. Muy resistente a la sequía.',
+    mejor_epoca: 'Floración en primavera y verano.'
+  },
+  {
+    id: 'litre', nombre: 'Litre', cientifico: 'Litrea caustica',
+    grupo: 'Flora nativa', emoji: '🍃', estado: 'Preocupación menor',
+    donde: ['quebrada-rosas'], reino: 'flora',
+    ficha: '¡Cuidado! A muchas personas les provoca alergia (ronchas) con solo tocarlo o estar bajo su sombra. Arbusto o árbol del matorral esclerófilo, de hojas coriáceas y ovaladas.',
+    mejor_epoca: 'Verde todo el año.'
+  },
+  {
+    id: 'peumo', nombre: 'Peumo', cientifico: 'Cryptocarya alba',
+    grupo: 'Flora nativa', emoji: '🌲', estado: 'Preocupación menor',
+    donde: ['quebrada-rosas'], reino: 'flora',
+    ficha: 'Árbol nativo de hoja perenne y aroma característico. Da frutos rojos comestibles en otoño, alimento de aves y zorros. Indica suelos con buena humedad dentro del bosque esclerófilo.',
+    mejor_epoca: 'Frutos rojos en otoño.'
+  },
+  {
+    id: 'doca', nombre: 'Doca', cientifico: 'Carpobrotus aequilaterus',
+    grupo: 'Flora nativa', emoji: '🌸', estado: 'Preocupación menor',
+    donde: ['punta-penablanca', 'humedal-tunquen'], reino: 'flora',
+    ficha: 'Planta rastrera de dunas y roqueríos costeros, con hojas carnosas y flores moradas o rosadas. Fija la arena y protege la duna; sus frutos son comestibles.',
+    mejor_epoca: 'Floración en primavera.'
+  },
+  {
+    id: 'totora', nombre: 'Totora y juncos', cientifico: 'Typha / Schoenoplectus',
+    grupo: 'Flora de humedal', emoji: '🌾', estado: 'Preocupación menor',
+    donde: ['humedal-tunquen'], reino: 'flora',
+    ficha: 'Plantas acuáticas que forman los totorales del humedal. Son refugio y sitio de nidificación de aves, y filtran naturalmente el agua. Clave para la salud del ecosistema.',
+    mejor_epoca: 'Presentes todo el año.'
   }
 ];
 

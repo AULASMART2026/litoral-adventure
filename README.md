@@ -36,6 +36,10 @@ requieren `https://` o `localhost` (no funciona abriendo el archivo con file://)
 
 ## ✅ Qué ya funciona
 
+- **🎧 En Ruta (guía virtual)**: al transitar (a pie o en bici), el GPS detecta la
+  zona y **narra por voz** (text-to-speech) su flora y fauna. Botón "¡Lo vi!" que
+  arma tu colección con barra de progreso. Incluye **modo prueba** para simular
+  llegar a una zona sin estar en Algarrobo.
 - **Inicio**: bienvenida, stats, accesos rápidos, mareas del día.
 - **Mapa**: mapa esquemático de la costa con los 5 puntos y las 3 rutas.
   GPS real: calcula tu distancia al punto más cercano (haversine) y dispara

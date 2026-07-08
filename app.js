@@ -31,8 +31,49 @@ const state = {
   view: 'inicio',
   pos: null,               // {lat,lng}
   speciesFilter: 'todos',
-  alertedNow: new Set()    // ids de puntos ya alertados (para no repetir)
+  alertedNow: new Set(),   // ids de puntos ya alertados (para no repetir)
+  mode: 'pie',             // 'pie' | 'bici'  (bici = radio de aviso mayor)
+  currentZone: null        // zona activa en el modo En Ruta
 };
+
+/* ---------- Guía por voz (text-to-speech, gratis y offline) ---------------- */
+const TTS = {
+  on: true,
+  voice: null,
+  supported: ('speechSynthesis' in window),
+  init(){
+    if (!TTS.supported) return;
+    const pick = () => {
+      const vs = speechSynthesis.getVoices();
+      TTS.voice = vs.find(v => /es[-_]CL/i.test(v.lang))
+               || vs.find(v => /es[-_](419|MX|US|AR|PE)/i.test(v.lang))
+               || vs.find(v => /^es/i.test(v.lang)) || null;
+    };
+    pick();
+    speechSynthesis.onvoiceschanged = pick;
+  },
+  speak(text){
+    if (!TTS.supported || !TTS.on) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    if (TTS.voice) u.voice = TTS.voice;
+    u.lang = (TTS.voice && TTS.voice.lang) || 'es-CL';
+    u.rate = 0.97; u.pitch = 1;
+    speechSynthesis.speak(u);
+  },
+  stop(){ if (TTS.supported) speechSynthesis.cancel(); }
+};
+TTS.init();
+
+/* ---------- Colección de especies avistadas (gamificación) ----------------- */
+const COL_KEY = 'la_collection_v1';
+function loadCol(){ try { return JSON.parse(localStorage.getItem(COL_KEY)) || []; } catch { return []; } }
+function saveCol(a){ localStorage.setItem(COL_KEY, JSON.stringify(a)); }
+function isSeen(id){ return loadCol().includes(id); }
+function markSeen(id){ const c = loadCol(); if (!c.includes(id)){ c.push(id); saveCol(c); } }
+
+/* radio de geocerca según modo (en bici se avisa antes porque vas más rápido) */
+const modeRadius = pt => pt.geofence * (state.mode === 'bici' ? 2.6 : 1);
 
 /* ============================================================================
    ROUTER
@@ -75,6 +116,7 @@ VIEWS.inicio = () => `
 
   <h2 class="section-title">Explora</h2>
   <div class="quick-grid">
+    <button class="quick quick--go" data-goto="enruta"><span class="ico">🎧</span><b>Recorrido guiado</b><small>Tu guía de voz de flora y fauna en terreno</small></button>
     <button class="quick" data-goto="mapa"><span class="ico">🧭</span><b>Mapa y rutas</b><small>Navega y recibe alertas de zonas protegidas</small></button>
     <button class="quick" data-goto="especies"><span class="ico">🔍</span><b>Guía de especies</b><small>Fauna marina y costera de Algarrobo</small></button>
     <button class="quick" data-goto="cuaderno"><span class="ico">📖</span><b>Cuaderno de campo</b><small>Registra tus avistamientos</small></button>
@@ -95,6 +137,7 @@ VIEWS.mapa = () => `
       <span>📍</span><span>Ubicación: <b id="gpsText">activando GPS…</b></span>
     </div>
   </div>
+  <button class="btn" id="startGuided" style="margin-bottom:14px">🎧 Iniciar recorrido guiado</button>
   <div class="legend">
     <span><i style="background:var(--la-danger)"></i>Exclusión</span>
     <span><i style="background:#b5651d"></i>Conservación estricta</span>
@@ -113,10 +156,105 @@ VIEWS.mapa = () => `
           <span class="pill st-menor">${r.distancia_km} km</span>
           <span class="pill st-menor">⏱ ${esc(r.duracion)}</span>
           <span class="pill st-vulnerable">${esc(r.dificultad)}</span>
+          <span class="pill st-menor">${({pie:'🚶 A pie',bici:'🚴 En bici',ambas:'🚶🚴 A pie y bici'})[LA_ROUTE_TYPE[r.id]]||''}</span>
         </div>
       </div>
     </div>`).join('')}
 `;
+
+/* ---- EN RUTA (guía virtual por voz) ---- */
+VIEWS.enruta = () => {
+  const total = LA_SPECIES.length, seen = loadCol().length;
+  const pct = total ? Math.round(seen/total*100) : 0;
+  return `
+    <h2 class="section-title">🎧 Recorrido guiado</h2>
+    <p class="muted" style="margin-bottom:12px">Activa el GPS y camina o pedalea: tu guía te irá contando por voz la flora y fauna de cada zona.</p>
+
+    <div class="er-controls">
+      <div class="seg" id="modeSeg">
+        <button data-mode="pie"  class="${state.mode==='pie'?'on':''}">🚶 A pie</button>
+        <button data-mode="bici" class="${state.mode==='bici'?'on':''}">🚴 En bici</button>
+      </div>
+      <button class="voice-toggle ${TTS.on?'on':''}" id="voiceToggle" aria-label="Voz">${TTS.on?'🔊':'🔇'}</button>
+    </div>
+    ${TTS.supported ? '' : '<p class="note">Tu navegador no soporta voz; verás la narración en texto.</p>'}
+
+    <div class="progress-card">
+      <div class="progress-head"><b>Tu colección</b><span>${seen} / ${total} especies</span></div>
+      <div class="progress-bar"><i style="width:${pct}%"></i></div>
+    </div>
+
+    <div id="zonePanel">${state.currentZone ? zonePanelHTML(state.currentZone) : zoneIdleHTML()}</div>
+
+    <div class="card demo-box">
+      <label for="simZone">🧪 Modo prueba — simula llegar a una zona (para probar sin estar en Algarrobo)</label>
+      <select id="simZone">
+        <option value="">Elige una zona…</option>
+        ${LA_POINTS.map(p=>`<option value="${p.id}">${p.icono} ${esc(p.nombre.split('(')[0].trim())}</option>`).join('')}
+      </select>
+    </div>
+
+    <div class="gps-readout" style="border:1px solid var(--la-line);border-radius:12px;margin-top:6px">
+      <span>📍</span><span id="erGps">activando GPS…</span>
+    </div>
+  `;
+};
+
+function zoneIdleHTML(){
+  return `<div class="zone-idle"><span class="big">🧭</span><b>Acércate a una zona</b>
+    <p class="muted">Cuando entres al área de un punto de interés, tu guía empezará a hablar y aquí aparecerá su flora y fauna. ¿Estás lejos? Usa el modo prueba de abajo.</p></div>`;
+}
+
+function zonePanelHTML(id){
+  const p = pointById(id); if (!p) return zoneIdleHTML();
+  const narr = LA_NARRATION[id] || p.resumen;
+  const sp = LA_SPECIES.filter(s => s.donde.includes(id));
+  const fauna = sp.filter(s => s.reino !== 'flora');
+  const flora = sp.filter(s => s.reino === 'flora');
+  const cardHTML = s => `
+    <div class="er-species ${isSeen(s.id)?'seen':''}">
+      <div class="species-emoji" data-openspecies="${s.id}">${s.emoji}</div>
+      <div style="flex:1" data-openspecies="${s.id}"><b>${esc(s.nombre)}</b><br><i style="font-size:12px;color:var(--la-ink-2)">${esc(s.cientifico)}</i></div>
+      <button class="see-btn" data-see="${s.id}">${isSeen(s.id)?'✓ Visto':'👁 ¡Lo vi!'}</button>
+    </div>`;
+  return `
+    <div class="zone-live">
+      <div class="zone-live__head"><span class="live-dot"></span> EN ZONA</div>
+      <h3>${p.icono} ${esc(p.nombre.split('(')[0].trim())}</h3>
+      <p class="narration">${esc(narr)}</p>
+      <button class="btn secondary small" id="replayNarr">🔊 Repetir narración</button>
+      ${fauna.length?`<h4 class="er-group">🐾 Fauna aquí</h4>${fauna.map(cardHTML).join('')}`:''}
+      ${flora.length?`<h4 class="er-group">🌿 Flora aquí</h4>${flora.map(cardHTML).join('')}`:''}
+    </div>`;
+}
+
+function enterZone(id, narrate){
+  if (!pointById(id)) return;
+  state.currentZone = id;
+  const panel = $('#zonePanel');
+  if (panel){ panel.innerHTML = zonePanelHTML(id); wireZonePanel(); }
+  if (narrate) TTS.speak(LA_NARRATION[id] || pointById(id).resumen);
+  if (navigator.vibrate) navigator.vibrate(60);
+}
+
+function wireZonePanel(){
+  const rp = $('#replayNarr');
+  if (rp) rp.onclick = () => { if (state.currentZone) TTS.speak(LA_NARRATION[state.currentZone] || pointById(state.currentZone).resumen); };
+  $$('[data-see]').forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    markSeen(b.dataset.see);
+    b.textContent = '✓ Visto';
+    const row = b.closest('.er-species'); if (row) row.classList.add('seen');
+    updateProgress();
+  });
+  $$('[data-openspecies]').forEach(el => el.onclick = () => openSpeciesSheet(el.dataset.openspecies));
+}
+
+function updateProgress(){
+  const total = LA_SPECIES.length, seen = loadCol().length;
+  const head = $('.progress-head span'); if (head) head.textContent = `${seen} / ${total} especies`;
+  const bar = $('.progress-bar i'); if (bar) bar.style.width = (total?Math.round(seen/total*100):0) + '%';
+}
 
 /* ---- ESPECIES ---- */
 VIEWS.especies = () => {
@@ -238,7 +376,19 @@ AFTER.inicio = () => {
 AFTER.mapa = () => {
   $$('.map-point').forEach(g => g.onclick = () => openPointSheet(g.dataset.point));
   $$('[data-route]').forEach(c => c.onclick = () => openRouteSheet(c.dataset.route));
+  const sg = $('#startGuided'); if (sg) sg.onclick = () => go('enruta');
   requestGeo();               // activa GPS y pinta el "tú estás aquí"
+};
+
+AFTER.enruta = () => {
+  wireZonePanel();
+  const seg = $('#modeSeg');
+  if (seg) seg.addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (b){ state.mode = b.dataset.mode; go('enruta'); } });
+  const vt = $('#voiceToggle');
+  if (vt) vt.onclick = () => { TTS.on = !TTS.on; if (!TTS.on) TTS.stop(); go('enruta'); };
+  const sim = $('#simZone');
+  if (sim) sim.onchange = () => { if (sim.value) enterZone(sim.value, true); };
+  requestGeo();
 };
 
 AFTER.especies = () => {
@@ -350,6 +500,15 @@ function onGeo(p){
   });
   if (txt && nearest) txt.innerHTML = `a <b>${fmtDist(nd)}</b> de ${esc(nearest.nombre.split('(')[0].trim())}`;
   positionUserDot(nearest, nd);
+
+  // lector de posición del modo En Ruta
+  const erGps = $('#erGps');
+  if (erGps && nearest) erGps.innerHTML = `a <b>${fmtDist(nd)}</b> de ${esc(nearest.nombre.split('(')[0].trim())}`;
+
+  // guía virtual: narrar automáticamente al entrar a una zona (radio según modo)
+  if (state.view === 'enruta' && nearest && nd <= modeRadius(nearest) && nearest.id !== state.currentZone){
+    enterZone(nearest.id, true);
+  }
 }
 function onGeoErr(){
   const txt = $('#gpsText');
@@ -402,7 +561,7 @@ function openSpeciesSheet(id){
       <div style="margin-top:6px"><span class="pill ${estadoClass(s.estado)}">${esc(s.estado)}</span> <span class="pill st-menor">${esc(s.grupo)}</span></div></div>
     </div>
     <div class="detail-block"><h4>Ficha</h4><p class="muted">${esc(s.ficha)}</p></div>
-    <div class="detail-block"><h4>🔊 Sonido</h4><p class="muted">${esc(s.sonido)}</p></div>
+    ${s.sonido?`<div class="detail-block"><h4>🔊 Sonido</h4><p class="muted">${esc(s.sonido)}</p></div>`:''}
     <div class="detail-block"><h4>📅 Mejor época</h4><p class="muted">${esc(s.mejor_epoca)}</p></div>
     <div class="detail-block"><h4>📍 Dónde verla</h4><p class="muted">${lugares}</p></div>
     <div class="btn-row"><button class="btn" id="sheetLog">📖 Anotar avistamiento</button><button class="btn secondary" onclick="closeSheet()">Cerrar</button></div>

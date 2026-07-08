@@ -216,3 +216,42 @@ body{
 .tide.alta .lbl{background:#e6f1de;color:#2f6a1f}
 
 .note{font-size:12px;color:var(--la-ink-2);background:#fff8e6;border:1px solid #f2e0b0;border-radius:10px;padding:10px 12px;margin-top:10px}
+
+/* ---------- En Ruta (guía virtual) ---------- */
+.tab--go{color:var(--la-green)}
+.quick--go{background:linear-gradient(135deg,var(--la-green),var(--la-teal));color:#fff;border:none}
+.quick--go small{color:#eafff0}
+
+.er-controls{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.seg{display:flex;flex:1;background:var(--la-card);border:1px solid var(--la-line);border-radius:12px;overflow:hidden}
+.seg button{flex:1;font:inherit;font-size:14px;font-weight:600;border:none;background:none;padding:11px 6px;cursor:pointer;color:var(--la-ink-2)}
+.seg button.on{background:var(--la-deep);color:#fff}
+.voice-toggle{width:46px;height:46px;flex:0 0 46px;border-radius:12px;border:1px solid var(--la-line);background:var(--la-card);font-size:20px;cursor:pointer}
+.voice-toggle.on{background:var(--la-teal);border-color:var(--la-teal)}
+
+.progress-card{background:var(--la-card);border:1px solid var(--la-line);border-radius:14px;padding:14px;box-shadow:var(--la-shadow);margin-bottom:14px}
+.progress-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+.progress-head span{color:var(--la-ink-2)}
+.progress-bar{height:9px;background:var(--la-line);border-radius:999px;overflow:hidden}
+.progress-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--la-green),var(--la-teal));border-radius:999px;transition:width .4s ease}
+
+.zone-idle{text-align:center;color:var(--la-ink-2);background:var(--la-card);border:1px dashed var(--la-line);border-radius:16px;padding:26px 18px;margin-bottom:14px}
+.zone-idle .big{font-size:40px;display:block;margin-bottom:8px}
+.zone-idle b{color:var(--la-ink)}
+
+.zone-live{background:var(--la-card);border:1px solid var(--la-teal);border-radius:16px;padding:16px;box-shadow:var(--la-shadow);margin-bottom:14px}
+.zone-live__head{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--la-green);margin-bottom:6px}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--la-green);box-shadow:0 0 0 0 rgba(63,163,77,.6);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(63,163,77,.55)}70%{box-shadow:0 0 0 9px rgba(63,163,77,0)}100%{box-shadow:0 0 0 0 rgba(63,163,77,0)}}
+.zone-live h3{font-size:18px;margin-bottom:8px}
+.narration{font-size:14px;line-height:1.55;color:var(--la-ink);background:var(--la-bg);border-left:3px solid var(--la-teal);border-radius:0 10px 10px 0;padding:10px 12px;margin-bottom:10px}
+.er-group{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--la-ink-2);margin:14px 0 8px}
+.er-species{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--la-line);border-radius:12px;margin-bottom:8px}
+.er-species .species-emoji{width:44px;height:44px;font-size:26px;cursor:pointer}
+.er-species b{cursor:pointer}
+.er-species.seen{background:#f2faf3;border-color:#c7e7cd}
+.see-btn{flex:0 0 auto;font:inherit;font-size:12px;font-weight:600;border:1.5px solid var(--la-green);color:var(--la-green);background:var(--la-card);border-radius:999px;padding:7px 12px;cursor:pointer}
+.er-species.seen .see-btn{background:var(--la-green);color:#fff;border-color:var(--la-green)}
+
+.demo-box label{display:block;font-size:13px;font-weight:600;color:var(--la-ink-2);margin-bottom:8px}
+.demo-box select{width:100%;font:inherit;font-size:14px;padding:11px 12px;border:1.5px solid var(--la-line);border-radius:12px;background:#fff;color:var(--la-ink)}
