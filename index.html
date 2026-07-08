@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0a6b8a">
+  <meta name="description" content="Litoral Adventure · Guía eco offline de Algarrobo: rutas, especies, mareas y travesías educativas en SUP a la Isla de los Pingüinos.">
+  <title>Litoral Adventure · Guía Eco de Algarrobo</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- ===== Cabecera ===== -->
+  <header class="app-header">
+    <img src="assets/logo.svg" alt="Litoral Adventure" class="brand-logo">
+    <div class="net-status" id="netStatus" title="Estado de conexión">
+      <span class="dot"></span><span id="netLabel">offline</span>
+    </div>
+  </header>
+
+  <!-- ===== Alerta de geocerca ===== -->
+  <div class="geo-alert" id="geoAlert" hidden>
+    <div class="geo-alert__inner">
+      <span class="geo-alert__icon" id="geoAlertIcon">⚠️</span>
+      <div>
+        <strong id="geoAlertTitle">Zona protegida</strong>
+        <p id="geoAlertMsg">Estás entrando a una zona de conservación.</p>
+      </div>
+      <button class="geo-alert__close" id="geoAlertClose" aria-label="Cerrar">✕</button>
+    </div>
+  </div>
+
+  <!-- ===== Contenido (se inyecta por vista) ===== -->
+  <main id="view" class="view"></main>
+
+  <!-- ===== Navegación inferior ===== -->
+  <nav class="tabbar" id="tabbar">
+    <button data-view="inicio"    class="tab is-active"><span>🏠</span>Inicio</button>
+    <button data-view="mapa"      class="tab"><span>🧭</span>Mapa</button>
+    <button data-view="especies"  class="tab"><span>🔍</span>Especies</button>
+    <button data-view="cuaderno"  class="tab"><span>📖</span>Cuaderno</button>
+    <button data-view="travesias" class="tab"><span>🐧</span>Travesías</button>
+  </nav>
+
+  <script src="data/content.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

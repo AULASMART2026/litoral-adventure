@@ -1,0 +1,16 @@
+{
+  "name": "Litoral Adventure · Guía Eco de Algarrobo",
+  "short_name": "Litoral Adventure",
+  "description": "Guía eco offline de Algarrobo: rutas, especies, mareas y travesías educativas en SUP a la Isla de los Pingüinos.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f8fa",
+  "theme_color": "#0a6b8a",
+  "lang": "es-CL",
+  "categories": ["travel", "education", "navigation"],
+  "icons": [
+    { "src": "assets/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

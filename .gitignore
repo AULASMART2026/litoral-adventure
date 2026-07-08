@@ -1,0 +1,9 @@
+# Config local de preview (no es parte del sitio)
+.claude/
+
+# Sistema
+Thumbs.db
+.DS_Store
+
+# Export local del cuaderno (si se genera aquí)
+litoral-adventure-cuaderno.json
