@@ -113,6 +113,46 @@ window.LA_NARRATION = {
     'Estás en el Humedal de Tunquén, un ecosistema costero muy valioso y de conservación estricta. En sus aguas someras verás garzas grandes cazando inmóviles, y otras aves entre totoras y juncos. Mantente en el sendero y guarda silencio para no espantarlas.'
 };
 
+/* --- Código del Explorador (cuidado y respeto) ------------------------------ */
+window.LA_CODIGO = [
+  { icono: '👀', titulo: 'Observa sin intervenir', texto: 'Mira y fotografía, pero no toques ni persigas a los animales.' },
+  { icono: '📏', titulo: 'Mantén distancia', texto: 'Acércate con calma y respeta el espacio de la fauna, sobre todo cerca de nidos.' },
+  { icono: '🚫', titulo: 'No alimentes', texto: 'Darles comida los enferma y altera su comportamiento natural.' },
+  { icono: '🥾', titulo: 'Sigue los senderos', texto: 'No salgas de las rutas habilitadas: proteges la vegetación y las dunas.' },
+  { icono: '🌱', titulo: 'No recolectes', texto: 'Deja flores, conchas y piedras donde están. Llévate solo fotos.' },
+  { icono: '🔇', titulo: 'Silencio y calma', texto: 'Baja la voz en zonas sensibles: el ruido asusta a las aves.' },
+  { icono: '🗑️', titulo: 'Llévate tu basura', texto: 'Todo lo que traes, vuelve contigo. Deja el lugar mejor de como lo encontraste.' }
+];
+
+/* --- Indicaciones del guía por zona (se muestran al entrar) ------------------ */
+window.LA_INDICACION = {
+  'isla-pinguinos': {
+    observa: 'Mira hacia los roqueríos: ahí anidan los pingüinos de Humboldt.',
+    rumbo:   'Obsérvalos desde el agua o desde el mirador, sin desembarcar.',
+    cuidado: 'Zona de exclusión: mantén distancia y silencio absoluto.'
+  },
+  'mirador-canelo': {
+    observa: 'Asómate al mirador y observa el mar abierto y las aves.',
+    rumbo:   'Continúa por el sendero señalizado hacia la costa.',
+    cuidado: 'No arrojes basura ni bajes por zonas de riesgo.'
+  },
+  'punta-penablanca': {
+    observa: 'Busca chungongos entre las rocas, mejor con marea baja.',
+    rumbo:   'Avanza por el borde del acantilado con precaución.',
+    cuidado: 'No pises nidos en la arena ni recolectes conchas vivas.'
+  },
+  'quebrada-rosas': {
+    observa: 'Reconoce quillay, litre y peumo a tu alrededor.',
+    rumbo:   'Sigue el sendero habilitado dentro del bosque.',
+    cuidado: 'No toques el litre (produce alergia) ni cortes ramas.'
+  },
+  'humedal-tunquen': {
+    observa: 'Observa las aves acuáticas entre totoras y juncos.',
+    rumbo:   'Camina solo por la pasarela o el sendero marcado.',
+    cuidado: 'Conservación estricta: guarda silencio y no ingreses al agua.'
+  }
+};
+
 /* --- Guía de especies locales --------------------------------------------- */
 window.LA_SPECIES = [
   {

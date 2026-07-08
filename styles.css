@@ -287,3 +287,53 @@ body{
 
 .demo-box label{display:block;font-size:13px;font-weight:600;color:var(--la-ink-2);margin-bottom:8px}
 .demo-box select{width:100%;font:inherit;font-size:14px;padding:11px 12px;border:1.5px solid var(--la-line);border-radius:12px;background:#fff;color:var(--la-ink)}
+
+/* ---------- Intro del recorrido ---------- */
+.er-intro__hero{background:linear-gradient(135deg,var(--la-green),var(--la-teal));color:#fff;border-radius:20px;padding:26px 20px;text-align:center;margin-bottom:14px}
+.er-intro__emoji{font-size:46px;display:block;margin-bottom:6px}
+.er-intro__hero h2{font-size:22px}
+.er-intro__hero p{font-size:14px;opacity:.96;margin-top:8px}
+.er-intro__pact b{font-size:15px}
+
+/* ---------- Charla del guía (onboarding) ---------- */
+.onboard{position:fixed;inset:0;z-index:60;background:linear-gradient(160deg,var(--la-deep),var(--la-teal));display:flex;align-items:flex-end;justify-content:center}
+.onboard__card{background:var(--la-card);width:100%;max-width:var(--la-maxw);max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px 20px 24px;animation:sheetUp .28s ease}
+.onboard__top{display:flex;align-items:center;justify-content:space-between}
+.onboard__ic{font-size:38px}
+.onboard__skip{background:none;border:none;color:var(--la-ink-2);font:inherit;font-size:13px;cursor:pointer;text-decoration:underline}
+.onboard__card h2{font-size:21px;margin:6px 0 12px}
+.onboard__body{font-size:15px;line-height:1.5;color:var(--la-ink)}
+.onboard__dots{display:flex;gap:6px;justify-content:center;margin:20px 0 14px}
+.onboard__dots i{width:8px;height:8px;border-radius:50%;background:var(--la-line);transition:all .2s}
+.onboard__dots i.on{background:var(--la-teal);width:22px;border-radius:5px}
+.onboard__nav{display:flex;gap:10px}
+.onboard__nav .btn{flex:1}
+.onboard-seg{margin-top:4px}
+
+.codigo-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.codigo-list li{display:flex;gap:12px;align-items:flex-start;background:var(--la-bg);border:1px solid var(--la-line);border-radius:12px;padding:10px 12px}
+.codigo-list .ci{font-size:22px;flex:0 0 auto}
+.codigo-list b{font-size:14px}
+.codigo-list p{font-size:13px;color:var(--la-ink-2);margin-top:2px}
+
+.tut{list-style:none;display:flex;flex-direction:column;gap:10px}
+.tut li{display:flex;gap:10px;align-items:flex-start;font-size:14px;background:var(--la-bg);border-radius:12px;padding:10px 12px;line-height:1.4}
+.tut li span{font-size:20px;flex:0 0 auto}
+
+/* ---------- Mini-mapa e indicaciones por zona ---------- */
+.zone-map{border:1px solid var(--la-line);border-radius:14px;overflow:hidden;margin-bottom:10px;background:linear-gradient(180deg,#dff0f4,#cfe8ef)}
+.zone-map svg{max-height:230px;display:block;margin:0 auto;width:100%}
+.zone-ind{display:flex;flex-direction:column;gap:8px;margin:8px 0 4px}
+.ind-row{display:flex;gap:9px;align-items:flex-start;font-size:13px;background:var(--la-bg);border-radius:10px;padding:9px 11px;line-height:1.4}
+.ind-row span{font-size:17px;flex:0 0 auto}
+.ind-row.care{background:#eef8ef;border:1px solid #cfe7d3}
+
+/* ---------- Celebración “¡Nueva especie!” ---------- */
+.celebrate{position:fixed;inset:0;z-index:70;display:grid;place-content:center;pointer-events:none}
+.celebrate__card{background:var(--la-card);border:2px solid var(--la-green);border-radius:20px;padding:22px 30px;text-align:center;box-shadow:var(--la-shadow);transform:scale(.6);opacity:0;transition:transform .35s cubic-bezier(.2,1.4,.4,1),opacity .3s}
+.celebrate.show .celebrate__card{transform:scale(1);opacity:1}
+.celebrate__emoji{font-size:56px;display:block;margin-bottom:4px}
+.celebrate.show .celebrate__emoji{animation:pop .5s ease}
+.celebrate__card b{font-size:18px;color:var(--la-green)}
+.celebrate__card p{font-size:15px;margin-top:2px}
+@keyframes pop{0%{transform:scale(.4) rotate(-12deg)}60%{transform:scale(1.2) rotate(6deg)}100%{transform:scale(1)}}

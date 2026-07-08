@@ -1,5 +1,5 @@
 /* Litoral Adventure · Service Worker (offline-first) */
-const CACHE = 'litoral-adventure-v4';
+const CACHE = 'litoral-adventure-v5';
 const SPECIES = ['pinguino-humboldt','chungungo','pelicano','pilpilen','garza-grande','yeco','quillay','litre','peumo','doca','totora'];
 const ASSETS = [
   './',

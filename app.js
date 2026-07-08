@@ -7,6 +7,15 @@ const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const pointById = id => LA_POINTS.find(p => p.id === id);
 
+/* posiciones esquemáticas de cada punto en el lienzo del mapa (compartidas) */
+const MAP_XY = {
+  'mirador-canelo':  { x: 200, y: 90 },
+  'isla-pinguinos':  { x: 120, y: 60 },
+  'punta-penablanca':{ x: 150, y: 210 },
+  'quebrada-rosas':  { x: 250, y: 230 },
+  'humedal-tunquen': { x: 110, y: 320 }
+};
+
 /* ---------- Utilidades ---------- */
 function haversine(a, b, c, d){                 // metros entre (a,b) y (c,d)
   const R = 6371000, r = Math.PI/180;
@@ -37,8 +46,14 @@ const state = {
   lastPos: null,           // última posición GPS (para medir avance)
   distAccum: 0,            // metros acumulados desde el último aliento
   lastAliento: 0,          // timestamp del último aliento
-  lastAlientoIdx: -1       // para no repetir frase seguida
+  lastAlientoIdx: -1,      // para no repetir frase seguida
+  recorridoActivo: false   // ¿ya pasó la charla del guía y empezó el recorrido?
 };
+
+/* ¿ya vio el tutorial completo alguna vez? */
+const ONB_KEY = 'la_onboarded_v1';
+const yaOnboarded = () => localStorage.getItem(ONB_KEY) === '1';
+const marcarOnboarded = () => localStorage.setItem(ONB_KEY, '1');
 
 /* ---------- Guía por voz (text-to-speech, gratis y offline) ---------------- */
 const TTS = {
@@ -174,11 +189,12 @@ VIEWS.mapa = () => `
 
 /* ---- EN RUTA (guía virtual por voz) ---- */
 VIEWS.enruta = () => {
+  if (!state.recorridoActivo) return enrutaIntroHTML();
   const total = LA_SPECIES.length, seen = loadCol().length;
   const pct = total ? Math.round(seen/total*100) : 0;
   return `
-    <h2 class="section-title">🎧 Recorrido guiado</h2>
-    <p class="muted" style="margin-bottom:12px">Activa el GPS y camina o pedalea: tu guía te irá contando por voz la flora y fauna de cada zona.</p>
+    <h2 class="section-title">🎧 Recorrido en marcha</h2>
+    <p class="muted" style="margin-bottom:12px">Camina o pedalea: el mapa detecta tu zona y tu guía te cuenta qué hay. 🌿 Con respeto y cuidado.</p>
 
     <div class="er-controls">
       <div class="seg" id="modeSeg">
@@ -218,9 +234,30 @@ function zoneIdleHTML(){
     <p class="muted">Cuando entres al área de un punto de interés, tu guía empezará a hablar y aquí aparecerá su flora y fauna. ¿Estás lejos? Usa el modo prueba de abajo.</p></div>`;
 }
 
+/* mini-mapa que se dispara al entrar a una zona: resalta el punto actual */
+function zoneMapSVG(zoneId){
+  const coast = `<path d="M0 0 H340 V150 Q250 170 230 250 Q215 320 180 380 H0 Z" fill="#eef7d9" opacity=".85"/>`
+    + `<path d="M0 0 H340 V150 Q250 170 230 250 Q215 320 180 380 H0 Z" fill="none" stroke="#bcd18a" stroke-width="2"/>`;
+  const pts = LA_POINTS.map(p => {
+    const c = MAP_XY[p.id]; if (!c) return '';
+    if (p.id === zoneId){
+      return `<g transform="translate(${c.x},${c.y})">
+        <circle r="26" fill="var(--la-teal)" opacity=".18"><animate attributeName="r" values="16;30;16" dur="2s" repeatCount="indefinite"/></circle>
+        <circle r="12" fill="var(--la-deep)" stroke="#fff" stroke-width="3"/>
+        <text x="0" y="4" font-size="12" text-anchor="middle">${p.icono}</text>
+        <text x="0" y="32" font-size="11" text-anchor="middle" fill="var(--la-ink)" font-weight="700">Estás aquí</text>
+      </g>`;
+    }
+    return `<g transform="translate(${c.x},${c.y})" opacity=".35"><circle r="6" fill="#8aa0a6" stroke="#fff" stroke-width="1.5"/></g>`;
+  }).join('');
+  return `<svg class="map-svg" viewBox="0 0 340 380" xmlns="http://www.w3.org/2000/svg">${coast}`
+    + `<text x="300" y="360" font-size="11" fill="#4a7ea8" text-anchor="end" opacity=".6">Océano Pacífico</text>${pts}</svg>`;
+}
+
 function zonePanelHTML(id){
   const p = pointById(id); if (!p) return zoneIdleHTML();
   const narr = LA_NARRATION[id] || p.resumen;
+  const ind = (window.LA_INDICACION || {})[id];
   const sp = LA_SPECIES.filter(s => s.donde.includes(id));
   const fauna = sp.filter(s => s.reino !== 'flora');
   const flora = sp.filter(s => s.reino === 'flora');
@@ -237,8 +274,14 @@ function zonePanelHTML(id){
     <div class="zone-live">
       <div class="zone-live__head"><span class="live-dot"></span> EN ZONA</div>
       <h3>${p.icono} ${esc(p.nombre.split('(')[0].trim())}</h3>
+      <div class="zone-map">${zoneMapSVG(id)}</div>
       <p class="narration">${esc(narr)}</p>
       <button class="btn secondary small" id="replayNarr">🔊 Repetir narración</button>
+      ${ind ? `<div class="zone-ind">
+        <div class="ind-row"><span>🔭</span><p>${esc(ind.observa)}</p></div>
+        <div class="ind-row"><span>🧭</span><p>${esc(ind.rumbo)}</p></div>
+        <div class="ind-row care"><span>💚</span><p><b>Cuida:</b> ${esc(ind.cuidado)}</p></div>
+      </div>` : ''}
       ${fauna.length?`<h4 class="er-group">🐾 Fauna aquí</h4>${fauna.map(cardHTML).join('')}`:''}
       ${flora.length?`<h4 class="er-group">🌿 Flora aquí</h4>${flora.map(cardHTML).join('')}`:''}
     </div>`;
@@ -258,10 +301,12 @@ function wireZonePanel(){
   if (rp) rp.onclick = () => { if (state.currentZone) TTS.speak(LA_NARRATION[state.currentZone] || pointById(state.currentZone).resumen); };
   $$('[data-see]').forEach(b => b.onclick = e => {
     e.stopPropagation();
-    markSeen(b.dataset.see);
+    const id = b.dataset.see, was = isSeen(id);
+    markSeen(id);
     b.textContent = '✓ Visto';
     const row = b.closest('.er-species'); if (row) row.classList.add('seen');
     updateProgress();
+    if (!was){ const s = LA_SPECIES.find(x => x.id === id); celebrate(s ? s.nombre : '', s ? s.emoji : ''); }
   });
   $$('[data-openspecies]').forEach(el => el.onclick = () => openSpeciesSheet(el.dataset.openspecies));
 }
@@ -447,7 +492,135 @@ AFTER.mapa = () => {
   requestGeo();               // activa GPS y pinta el "tú estás aquí"
 };
 
+/* ===== Charla del guía (onboarding + tutorial) ===== */
+function codigoListHTML(){
+  return `<ul class="codigo-list">${LA_CODIGO.map(c =>
+    `<li><span class="ci">${c.icono}</span><div><b>${esc(c.titulo)}</b><p>${esc(c.texto)}</p></div></li>`
+  ).join('')}</ul>`;
+}
+function modeChooserHTML(){
+  return `<div class="seg onboard-seg">
+      <button data-mode="pie"  class="${state.mode==='pie'?'on':''}">🚶 A pie</button>
+      <button data-mode="bici" class="${state.mode==='bici'?'on':''}">🚴 En bici</button>
+    </div>
+    <p class="muted" style="margin-top:10px">Puedes cambiarlo cuando quieras durante el recorrido.</p>`;
+}
+function enrutaIntroHTML(){
+  return `
+    <div class="er-intro">
+      <div class="er-intro__hero">
+        <span class="er-intro__emoji">🎧</span>
+        <h2>Recorrido guiado</h2>
+        <p>Tu guía te acompaña por voz: te cuenta la flora y fauna de cada zona, te da indicaciones y te anima mientras avanzas.</p>
+      </div>
+      <div class="card er-intro__pact">
+        <b>🌿 Antes de partir</b>
+        <p class="muted">Recibirás una breve charla del guía y el Código del Explorador, para recorrer cuidando y respetando este lugar.</p>
+      </div>
+      <button class="btn" id="comenzarRecorrido">▶ Comenzar recorrido guiado</button>
+      <button class="btn secondary" id="verCodigo" style="margin-top:10px">🌿 Ver el Código del Explorador</button>
+    </div>`;
+}
+function openCodigoSheet(){
+  openSheet(`<h2>🌿 Código del Explorador</h2>
+    <p class="muted">Cuidar y respetar también es parte de la aventura.</p>
+    ${codigoListHTML()}
+    <div class="btn-row"><button class="btn" onclick="closeSheet()">¡Entendido!</button></div>`);
+}
+function buildPasos(full){
+  const pasos = [
+    { ic:'👋', t:'¡Bienvenida a bordo!',
+      voz:'¡Hola! Soy tu guía en Litoral Adventure. Antes de partir, conversemos un momento.',
+      html:`<p class="muted">Vas a recorrer un lugar único de la costa de Algarrobo. Yo te acompaño en cada paso para que lo vivas y lo cuides.</p>` },
+    { ic:'🌿', t:'Código del Explorador',
+      voz:'Recuerda lo más importante: observamos sin intervenir, con respeto y cuidado por cada ser vivo.',
+      html: codigoListHTML() }
+  ];
+  if (full){
+    pasos.push({ ic:'🗺️', t:'Cómo funciona el recorrido',
+      voz:'A medida que avances, el mapa detectará tu zona y te contaré qué hay a tu alrededor.',
+      html:`<ul class="tut">
+        <li><span>📍</span> Al entrar a una zona, el <b>mapa se activa</b> y te doy indicaciones.</li>
+        <li><span>🔊</span> Escucharás la <b>narración por voz</b> de la flora y fauna del lugar.</li>
+        <li><span>💪</span> Te <b>animaré</b> mientras avanzas.</li>
+      </ul>` });
+    pasos.push({ ic:'📕', t:'Arma tu Pokédex',
+      voz:'Cuando descubras una especie, márcala como “Lo vi” para coleccionarla en tu Pokédex.',
+      html:`<ul class="tut">
+        <li><span>👁</span> Toca <b>“¡Lo vi!”</b> cuando avistes una especie.</li>
+        <li><span>🖼️</span> Se revela su <b>foto real</b> y sube tu colección.</li>
+        <li><span>📖</span> También puedes anotarla en tu <b>Cuaderno de campo</b>.</li>
+      </ul>` });
+  }
+  pasos.push({ ic:'🚶🚴', t:'¿Cómo te mueves hoy?',
+    voz:'¿Vas a pie o en bicicleta?',
+    html: modeChooserHTML() });
+  pasos.push({ ic:'🤝', t:'Tu compromiso', final:true,
+    voz:'¿Te comprometes a cuidar y respetar este lugar mientras lo recorres?',
+    html:`<p>Me comprometo a <b>observar sin intervenir</b>, seguir las indicaciones y <b>dejar todo como lo encontré</b>. 🌊</p>` });
+  return pasos;
+}
+function startRecorrido(){
+  const pasos = buildPasos(!yaOnboarded());
+  let i = 0;
+  const ov = document.createElement('div');
+  ov.className = 'onboard'; ov.id = 'onboard';
+  document.body.appendChild(ov);
+
+  function finish(){
+    TTS.stop();
+    marcarOnboarded();
+    state.recorridoActivo = true;
+    ov.remove();
+    go('enruta');
+    requestGeo();
+    setTimeout(() => { if (TTS.on) TTS.speak('¡Listo! Empecemos con calma. Disfruta y cuida cada rincón.'); }, 350);
+  }
+  function render(){
+    const p = pasos[i];
+    ov.innerHTML = `
+      <div class="onboard__card">
+        <div class="onboard__top">
+          <span class="onboard__ic">${p.ic}</span>
+          <button class="onboard__skip" id="obSkip">Saltar</button>
+        </div>
+        <h2>${esc(p.t)}</h2>
+        <div class="onboard__body">${p.html}</div>
+        <div class="onboard__dots">${pasos.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('')}</div>
+        <div class="onboard__nav">
+          ${i>0?`<button class="btn secondary" id="obPrev">Atrás</button>`:''}
+          <button class="btn" id="obNext">${p.final?'🤝 Me comprometo · Comenzar':'Siguiente'}</button>
+        </div>
+      </div>`;
+    if (p.voz) TTS.speak(p.voz);
+    ov.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => {
+      state.mode = b.dataset.mode;
+      ov.querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x === b));
+    });
+    $('#obSkip', ov).onclick = finish;
+    const prev = $('#obPrev', ov); if (prev) prev.onclick = () => { i--; render(); };
+    $('#obNext', ov).onclick = () => { if (i < pasos.length-1){ i++; render(); } else finish(); };
+  }
+  render();
+}
+
+/* Celebración al descubrir una especie nueva */
+function celebrate(nombre, emoji){
+  const t = document.createElement('div');
+  t.className = 'celebrate';
+  t.innerHTML = `<div class="celebrate__card"><span class="celebrate__emoji">${emoji||'🎉'}</span><b>¡Nueva especie!</b><p>${esc(nombre)}</p></div>`;
+  document.body.appendChild(t);
+  if (navigator.vibrate) navigator.vibrate([40,30,60]);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 2200);
+}
+
 AFTER.enruta = () => {
+  if (!state.recorridoActivo){
+    const cr = $('#comenzarRecorrido'); if (cr) cr.onclick = () => startRecorrido();
+    const vc = $('#verCodigo'); if (vc) vc.onclick = () => openCodigoSheet();
+    return;
+  }
   wireZonePanel();
   const seg = $('#modeSeg');
   if (seg) seg.addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (b){ state.mode = b.dataset.mode; go('enruta'); } });
@@ -476,6 +649,7 @@ AFTER.especies = () => {
     if (on && lock) lock.remove();
     else if (!on && !lock){ const l = document.createElement('span'); l.className = 'dex-lock'; l.textContent = '?'; imgWrap.appendChild(l); }
     updateDexCounter();
+    if (on){ const s = LA_SPECIES.find(x => x.id === b.dataset.toggle); celebrate(s ? s.nombre : '', s ? s.emoji : ''); }
   });
 };
 
@@ -513,13 +687,7 @@ AFTER.travesias = () => {
 function mapSVG(){
   // posiciones esquemáticas en el lienzo (no proyección real; la distancia
   // real se calcula por GPS con haversine sobre lat/lng verdaderas)
-  const P = {
-    'mirador-canelo':  {x:200, y:90},
-    'isla-pinguinos':  {x:120, y:60},
-    'punta-penablanca':{x:150, y:210},
-    'quebrada-rosas':  {x:250, y:230},
-    'humedal-tunquen': {x:110, y:320}
-  };
+  const P = MAP_XY;
   const routePath = r => r.puntos.map(id => P[id]).filter(Boolean);
   const routes = LA_ROUTES.map(r => {
     const pts = routePath(r);
@@ -613,10 +781,9 @@ function onGeoErr(){
 function positionUserDot(nearest, nd){
   // aproxima la posición del usuario en el mapa esquemático cerca del punto más cercano
   const dot = $('#userDot'); if (!dot || !nearest) return;
-  const P = {'mirador-canelo':[200,90],'isla-pinguinos':[120,60],'punta-penablanca':[150,210],'quebrada-rosas':[250,230],'humedal-tunquen':[110,320]};
-  const base = P[nearest.id]; if(!base) return;
+  const base = MAP_XY[nearest.id]; if(!base) return;
   const off = Math.min(nd/40, 28);
-  dot.setAttribute('transform', `translate(${base[0]+off*0.4},${base[1]+off*0.6})`);
+  dot.setAttribute('transform', `translate(${base.x+off*0.4},${base.y+off*0.6})`);
   dot.style.display = 'block';
 }
 
@@ -680,6 +847,7 @@ function openSpeciesSheet(id){
     sb.classList.toggle('secondary', !on);
     $('.sheet-hero')?.classList.toggle('locked', !on);
     syncDexCard(s.id);
+    if (on) celebrate(s.nombre, s.emoji);
   };
   const b = $('#sheetLog'); if (b) b.onclick = () => { closeSheet(); go('cuaderno'); setTimeout(()=>{ const sel=$('#fSpecies'); if(sel){sel.value=s.id;} },60); };
 }
