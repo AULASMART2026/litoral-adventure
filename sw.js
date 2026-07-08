@@ -1,5 +1,5 @@
 /* Litoral Adventure · Service Worker (offline-first) */
-const CACHE = 'litoral-adventure-v2';
+const CACHE = 'litoral-adventure-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -21,18 +21,22 @@ self.addEventListener('activate', e => {
   );
 });
 
-/* Cache-first para los assets propios; red con fallback a caché para el resto */
+/* Network-first para recursos propios (siempre la última versión cuando hay
+   internet); si no hay red, cae a la copia en caché → sigue funcionando offline. */
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
-  e.respondWith(
-    caches.match(req).then(hit => hit || fetch(req).then(res => {
-      // guarda copias de recursos propios del mismo origen
-      if (res.ok && new URL(req.url).origin === location.origin){
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(req, copy));
-      }
-      return res;
-    }).catch(() => caches.match('./index.html')))
-  );
+  const sameOrigin = new URL(req.url).origin === location.origin;
+
+  if (sameOrigin){
+    e.respondWith(
+      fetch(req).then(res => {
+        if (res.ok){ const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+        return res;
+      }).catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
+    );
+    return;
+  }
+  // recursos externos: caché si existe, si no red
+  e.respondWith(caches.match(req).then(hit => hit || fetch(req)));
 });
