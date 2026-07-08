@@ -263,13 +263,26 @@ function updateProgress(){
   const bar = $('.progress-bar i'); if (bar) bar.style.width = (total?Math.round(seen/total*100):0) + '%';
 }
 
-/* Aliento del guía: frase motivadora (neutra) mientras se avanza */
+/* Aliento del guía: frase motivadora (neutra) mientras se avanza.
+   Rota el tono y evita repetir las frases recientes → sensación de variedad. */
+const _alientoHist = [];
 function alentar(){
   if (!LA_ALIENTO || !LA_ALIENTO.length) return;
-  let i; do { i = Math.floor(Math.random() * LA_ALIENTO.length); }
-  while (LA_ALIENTO.length > 1 && i === state.lastAlientoIdx);
+  const lastTono = state.lastAlientoIdx >= 0 && LA_ALIENTO[state.lastAlientoIdx]
+    ? LA_ALIENTO[state.lastAlientoIdx].tono : null;
+
+  const all = LA_ALIENTO.map((_, idx) => idx);
+  let pool = all.filter(idx => !_alientoHist.includes(idx));   // fuera las recientes
+  if (!pool.length) pool = all;
+  const otroTono = pool.filter(idx => LA_ALIENTO[idx].tono !== lastTono);
+  if (otroTono.length) pool = otroTono;                        // preferir otro tono
+
+  const i = pool[Math.floor(Math.random() * pool.length)];
   state.lastAlientoIdx = i;
-  const frase = LA_ALIENTO[i];
+  _alientoHist.push(i);
+  if (_alientoHist.length > 8) _alientoHist.shift();           // memoria de 8 frases
+
+  const frase = LA_ALIENTO[i].frase;
   const box = $('#alientoBox');
   if (box){
     box.textContent = '💪 ' + frase;

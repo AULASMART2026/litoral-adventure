@@ -228,28 +228,49 @@ window.LA_SPECIES = [
 
 /* --- Frases de aliento del guía virtual ------------------------------------ */
 /* Neutras (sin marcar género). El guía las dice por voz mientras avanzas,     */
-/* solo para incentivar. Estilo cercano y motivador.                           */
+/* solo para incentivar. Variedad de tonos: 'energia', 'zen', 'chileno',       */
+/* 'costa', 'logro'. El motor rota tonos y no repite frases recientes.          */
 window.LA_ALIENTO = [
-  '¡Vas muy bien! Cada paso te acerca a algo nuevo.',
-  'Respira hondo el aire del mar y sigue a tu ritmo.',
-  'Paso a paso se recorre la costa. ¡Tú puedes!',
-  'Lo estás haciendo genial. Disfruta el camino.',
-  'El mejor ritmo es el tuyo. Sigue avanzando.',
-  'Cada metro cuenta. ¡Ánimo, que vas increíble!',
-  'Mira lo lejos que has llegado. ¡Sigue así!',
-  'La naturaleza te acompaña. Continúa con energía.',
-  'Un pie delante del otro y la aventura se despliega.',
-  '¡Qué bien lo haces! Hoy el litoral es tuyo.',
-  'Tómate tu tiempo: esto no es una carrera, es una experiencia.',
-  'Fuerza y calma: esa mezcla te lleva lejos.',
-  'El horizonte te espera. Sigue avanzando.',
-  'Cada zona trae una sorpresa. ¡Vamos por la siguiente!',
-  'Estás conectando con el mar y con tu propio ritmo. Sigue.',
-  '¡Ánimo! Lo mejor del camino es recorrerlo.',
-  'Tu energía se nota. Continúa disfrutando.',
-  'Escucha el mar, siente la brisa y sigue adelante.',
-  'Vas por buen camino, de verdad. ¡No te detengas!',
-  'Que nada te frene: la costa tiene mucho por mostrarte.'
+  /* Energético */
+  { tono: 'energia', frase: '¡Vamos con todo! Cada paso suma.' },
+  { tono: 'energia', frase: '¡Ánimo! Que el envión no se detenga.' },
+  { tono: 'energia', frase: 'Fuerza en las piernas y una sonrisa: así se avanza.' },
+  { tono: 'energia', frase: '¡Eso! Sigue con esa energía.' },
+  { tono: 'energia', frase: 'Un poco más y lo logras. ¡Dale!' },
+  { tono: 'energia', frase: '¡Qué ritmo! No aflojes ahora.' },
+  { tono: 'energia', frase: 'Energía al máximo: la costa te espera.' },
+  /* Zen / reflexivo */
+  { tono: 'zen', frase: 'Respira hondo. Estás justo donde debes estar.' },
+  { tono: 'zen', frase: 'Suelta la prisa y disfruta el instante.' },
+  { tono: 'zen', frase: 'Cada paso, una respiración. Presente y en calma.' },
+  { tono: 'zen', frase: 'Escucha el mar y deja que te marque el ritmo.' },
+  { tono: 'zen', frase: 'No hay apuro: el camino también es el destino.' },
+  { tono: 'zen', frase: 'Siente la brisa, agradece el momento y sigue.' },
+  { tono: 'zen', frase: 'Calma y constancia: así fluye todo.' },
+  /* Chileno cercano */
+  { tono: 'chileno', frase: '¡Vas bacán! Sigue así no más.' },
+  { tono: 'chileno', frase: 'De a poquito se llega lejos. ¡Tú puedes!' },
+  { tono: 'chileno', frase: '¡Qué buena onda tu ritmo! Dale que vas bien.' },
+  { tono: 'chileno', frase: 'Tranqui, sin apuro, que lo estás haciendo increíble.' },
+  { tono: 'chileno', frase: 'Un pasito más y ya po, ¡sigamos!' },
+  { tono: 'chileno', frase: 'Puro avance y buena onda. ¡Así se hace!' },
+  { tono: 'chileno', frase: 'Se agradece tu energía. Vamos con calma no más.' },
+  /* Costa / naturaleza */
+  { tono: 'costa', frase: 'El mar te acompaña en cada paso. Sigue.' },
+  { tono: 'costa', frase: 'Huele a mar y a aventura. ¡Continúa!' },
+  { tono: 'costa', frase: 'Las aves ya te vieron pasar. ¡Vas muy bien!' },
+  { tono: 'costa', frase: 'Cada roca y cada ola tienen algo que contarte.' },
+  { tono: 'costa', frase: 'La costa premia a quien la recorre con respeto.' },
+  { tono: 'costa', frase: 'Brisa, sal y horizonte: tu mejor compañía.' },
+  { tono: 'costa', frase: 'El Pacífico te recibe a tu propio ritmo.' },
+  /* Logro / progreso */
+  { tono: 'logro', frase: 'Mira lo lejos que has llegado. ¡Increíble!' },
+  { tono: 'logro', frase: 'Cada metro recorrido ya es una victoria.' },
+  { tono: 'logro', frase: 'Lo que llevas avanzado no es poco. ¡Sigue sumando!' },
+  { tono: 'logro', frase: 'Vas dejando huella, paso a paso.' },
+  { tono: 'logro', frase: 'Ese avance se nota. ¡Puro orgullo!' },
+  { tono: 'logro', frase: 'Ya recorriste un buen tramo. ¡Y falta lo mejor!' },
+  { tono: 'logro', frase: 'Constancia pura: así se conquistan las rutas.' }
 ];
 
 /* --- Mareas (DEMO) -------------------------------------------------------- */
