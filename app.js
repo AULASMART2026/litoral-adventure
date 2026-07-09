@@ -1033,7 +1033,8 @@ function openSpeciesSheet(id){
 
     <div class="detail-block"><h4>${t('ficha')}</h4><p class="muted">${esc(spTr(s,'ficha'))}</p></div>
     ${curi ? `<div class="sabias"><span class="sabias-ic">💡</span><div><b>${t('sabias')}</b><p>${esc(curi)}</p></div></div>` : ''}
-    ${s.sonido?`<div class="detail-block"><h4>${t('sonido')}</h4><p class="muted">${esc(spTr(s,'sonido'))}</p>
+    ${(s.sonido || audioFor(s.id))?`<div class="detail-block"><h4>${t('sonido')}</h4>
+      ${s.sonido?`<p class="muted">${esc(spTr(s,'sonido'))}</p>`:''}
       ${audioFor(s.id)?`<button class="btn secondary small" id="playSound" style="margin-top:8px">${t('escuchar_sonido')}</button>
         <audio id="sndEl" src="${audioFor(s.id).file}" preload="none"></audio>
         <p class="img-credit" style="text-align:left;margin-top:6px">🎙️ ${esc(audioFor(s.id).credit)}${audioFor(s.id).license?' · '+esc(audioFor(s.id).license):''} · <a href="${audioFor(s.id).source}" target="_blank" rel="noopener">Wikimedia Commons</a></p>`:''}

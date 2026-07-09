@@ -1,7 +1,6 @@
 /* Litoral Adventure · Service Worker (offline-first) */
-const CACHE = 'litoral-adventure-v10';
-const SOUNDS = ['./assets/sounds/garza-grande.ogg','./assets/sounds/pelicano.mp3','./assets/sounds/yeco.mp3'];
-/* Núcleo de la app. Las fotos de especies (muchas) se cachean en runtime al verlas. */
+const CACHE = 'litoral-adventure-v11';
+/* Núcleo de la app. Fotos y sonidos de especies se cachean en runtime al usarlos. */
 const ASSETS = [
   './',
   './index.html',
@@ -15,8 +14,7 @@ const ASSETS = [
   './data/species-audio.js',
   './assets/logo.svg',
   './assets/lib/qrcode.min.js',
-  './manifest.webmanifest',
-  ...SOUNDS
+  './manifest.webmanifest'
 ];
 
 self.addEventListener('install', e => {
