@@ -245,6 +245,7 @@ body{
 .dex-card{position:relative;background:var(--la-card);border:1px solid var(--la-line);border-radius:16px;overflow:hidden;box-shadow:var(--la-shadow);cursor:pointer;display:flex;flex-direction:column}
 .dex-card:active{transform:scale(.98)}
 .dex-num{position:absolute;top:8px;left:8px;z-index:2;font-size:11px;font-weight:700;color:#fff;background:rgba(11,43,51,.55);border-radius:999px;padding:2px 8px}
+.dex-audio{position:absolute;top:6px;right:6px;z-index:2;font-size:13px;background:rgba(11,43,51,.55);border-radius:999px;padding:2px 6px;line-height:1}
 .dex-img{position:relative;aspect-ratio:1/1;background:var(--la-sand);overflow:hidden}
 .dex-img img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .3s ease}
 .dex-emoji{width:100%;height:100%;place-content:center;font-size:44px;background:var(--la-sand)}

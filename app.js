@@ -519,6 +519,7 @@ VIEWS.especies = () => {
             <img src="${imgFor(s.id)}" alt="${esc(spTr(s,'nombre'))}" loading="lazy"
                  onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
             <span class="dex-emoji" style="display:none">${s.emoji}</span>
+            ${audioFor(s.id)?'<span class="dex-audio" title="Tiene sonido">🔊</span>':''}
             ${seenIt?'':'<span class="dex-lock">?</span>'}
           </div>
           <div class="dex-name">${esc(spTr(s,'nombre'))}</div>
