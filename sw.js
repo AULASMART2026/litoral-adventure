@@ -1,20 +1,21 @@
 /* Litoral Adventure · Service Worker (offline-first) */
-const CACHE = 'litoral-adventure-v9';
-const SPECIES = ['pinguino-humboldt','chungungo','pelicano','pilpilen','garza-grande','yeco','quillay','litre','peumo','doca','totora'];
+const CACHE = 'litoral-adventure-v10';
 const SOUNDS = ['./assets/sounds/garza-grande.ogg','./assets/sounds/pelicano.mp3','./assets/sounds/yeco.mp3'];
+/* Núcleo de la app. Las fotos de especies (muchas) se cachean en runtime al verlas. */
 const ASSETS = [
   './',
   './index.html',
   './styles.css',
   './app.js',
   './data/content.js',
+  './data/species-extra.js',
   './data/i18n-en.js',
+  './data/species-en.js',
   './data/species-img.js',
   './data/species-audio.js',
   './assets/logo.svg',
   './assets/lib/qrcode.min.js',
   './manifest.webmanifest',
-  ...SPECIES.map(id => `./assets/species/${id}.jpg`),
   ...SOUNDS
 ];
 

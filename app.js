@@ -391,7 +391,7 @@ function zonePanelHTML(id){
         <div class="ind-row"><span>🧭</span><p>${esc(ind.rumbo)}</p></div>
         <div class="ind-row care"><span>💚</span><p><b>${t('cuida')}:</b> ${esc(ind.cuidado)}</p></div>
       </div>` : ''}
-      ${fauna.length?`<h4 class="er-group">${t('fauna_aqui')}</h4>${fauna.map(cardHTML).join('')}`:''}
+      ${fauna.length?`<h4 class="er-group">${t('fauna_aqui')} <span class="pill st-menor">${fauna.length}</span></h4>${fauna.slice(0,12).map(cardHTML).join('')}${fauna.length>12?`<p class="muted" style="text-align:center;font-size:12px">${state.lang==='en'?`+${fauna.length-12} more in the Pokédex →`:`+${fauna.length-12} más en la Pokédex →`}</p>`:''}`:''}
       ${flora.length?`<h4 class="er-group">${t('flora_aqui')}</h4>${flora.map(cardHTML).join('')}`:''}
       ${quizHTML(id)}
     </div>`;
@@ -496,7 +496,7 @@ VIEWS.especies = () => {
   const list = LA_SPECIES.filter(s => state.speciesFilter === 'todos' || s.grupo === state.speciesFilter);
   const total = LA_SPECIES.length, seen = loadCol().length;
   const pct = total ? Math.round(seen/total*100) : 0;
-  const grpEN = {'Aves marinas':'Seabirds','Mamíferos marinos':'Marine mammals','Aves playeras':'Shorebirds','Aves de humedal':'Wetland birds','Flora nativa':'Native plants','Flora de humedal':'Wetland plants'};
+  const grpEN = {'Aves marinas':'Seabirds','Mamíferos marinos':'Marine mammals','Aves playeras':'Shorebirds','Aves de humedal':'Wetland birds','Flora nativa':'Native plants','Flora de humedal':'Wetland plants','Mamíferos terrestres':'Land mammals','Reptiles':'Reptiles','Anfibios':'Amphibians','Peces costeros':'Coastal fish','Invertebrados marinos':'Marine invertebrates'};
   const grpLabel = g => g === 'todos' ? t('todas') : (state.lang === 'en' ? (grpEN[g] || g) : g);
   return `
     <h2 class="section-title">${t('pokedex_t')}</h2>
