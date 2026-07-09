@@ -122,7 +122,7 @@ function toggleSeen(id){ isSeen(id) ? markUnseen(id) : markSeen(id); return isSe
 
 /* ruta de la foto real (Wikimedia, descargada en assets/species) */
 const imgFor = id => `assets/species/${id}.jpg`;
-const imgCredit = id => (window.LA_IMG && LA_IMG[id]) || null;
+const imgCredit = id => { const o = window.LA_IMG && LA_IMG[id]; return (o && o.source) ? o : null; };
 const audioFor = id => (window.LA_AUDIO && LA_AUDIO[id]) || null;
 
 /* ---------- Bilingüe (ES / EN) ---------- */
