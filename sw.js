@@ -1,5 +1,5 @@
 /* Litoral Adventure · Service Worker (offline-first) */
-const CACHE = 'litoral-adventure-v13';
+const CACHE = 'litoral-adventure-v14';
 /* Núcleo de la app. Fotos y sonidos de especies se cachean en runtime al usarlos. */
 const ASSETS = [
   './',
@@ -15,6 +15,8 @@ const ASSETS = [
   './data/species-audio.js',
   './assets/logo.svg',
   './assets/lib/qrcode.min.js',
+  './assets/lib/leaflet.js',
+  './assets/lib/leaflet.css',
   './manifest.webmanifest'
 ];
 

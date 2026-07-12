@@ -201,6 +201,7 @@ const modeRadius = pt => pt.geofence * (state.mode === 'bici' ? 2.6 : 1);
    ROUTER
    ============================================================================ */
 function go(view){
+  if (typeof cleanupMaps === 'function') cleanupMaps();   // libera mapas Leaflet del view anterior
   state.view = view;
   $$('.tab').forEach(t => t.classList.toggle('is-active', t.dataset.view === view));
   const v = $('#view');
@@ -265,17 +266,15 @@ VIEWS.mapa = () => {
   return `
   <h2 class="section-title">${t('mapa_t')}</h2>
   <div class="map-wrap">
-    ${mapSVG()}
+    <div id="leafmap" class="leafmap"></div>
     <div class="gps-readout" id="gpsReadout">
       <span>📍</span><span>${t('ubicacion')}: <b id="gpsText">${t('activando_gps')}</b></span>
     </div>
   </div>
   <button class="btn" id="startGuided" style="margin-bottom:14px">${t('iniciar_guiado')}</button>
   <div class="legend">
-    <span><i style="background:var(--la-danger)"></i>${t('leg_exclusion')}</span>
-    <span><i style="background:#b5651d"></i>${t('leg_estricta')}</span>
-    <span><i style="background:var(--la-teal)"></i>${t('leg_obs')}</span>
-    <span><i style="background:var(--la-green)"></i>${t('leg_sendero')}</span>
+    <span><i style="background:#1e88e5"></i>${state.lang==='en'?'Recorded route':'Ruta del recorrido'}</span>
+    <span>📍 ${state.lang==='en'?'Points of interest':'Puntos de interés'}</span>
   </div>
 
   <h2 class="section-title">${t('rutas_oficiales')}</h2>
@@ -383,7 +382,7 @@ function zonePanelHTML(id){
     <div class="zone-live">
       <div class="zone-live__head"><span class="live-dot"></span> ${t('en_zona')}</div>
       <h3>${p.icono} ${esc(ptTr(p,'nombre').split('(')[0].trim())}</h3>
-      <div class="zone-map">${zoneMapSVG(id)}</div>
+      <div class="zone-map"><div id="zonemap" class="zonemap"></div></div>
       <p class="narration">${esc(narr)}</p>
       <button class="btn secondary small" id="replayNarr">${t('repetir')}</button>
       ${ind ? `<div class="zone-ind">
@@ -437,6 +436,7 @@ function enterZone(id, narrate){
 }
 
 function wireZonePanel(){
+  if (state.currentZone && $('#zonemap')) initZoneMap(state.currentZone);
   const rp = $('#replayNarr');
   if (rp) rp.onclick = () => { if (state.currentZone) TTS.speak(narrOf(state.currentZone) || ptTr(pointById(state.currentZone), 'resumen')); };
   $$('[data-see]').forEach(b => b.onclick = e => {
@@ -636,8 +636,51 @@ AFTER.inicio = () => {
   const q = $('#openQR'); if (q) q.onclick = openQRSheet;
 };
 
+/* ===== Mapas reales (Leaflet) ===== */
+let mainMap = null, zoneMap = null, userMarkerMain = null, userMarkerZone = null;
+const OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OSM_ATTR = '© OpenStreetMap';
+const poiIcon = p => L.divIcon({ className:'poi-mark', html:`<div class="poi-pin">${p.icono}</div>`, iconSize:[34,34], iconAnchor:[17,34] });
+const userIcon = () => L.divIcon({ className:'user-mark', html:'<div class="user-pin"></div>', iconSize:[18,18], iconAnchor:[9,9] });
+
+function cleanupMaps(){
+  if (mainMap){ try{ mainMap.remove(); }catch{} mainMap = null; userMarkerMain = null; }
+  if (zoneMap){ try{ zoneMap.remove(); }catch{} zoneMap = null; userMarkerZone = null; }
+}
+function initMainMap(){
+  const el = $('#leafmap'); if (!el || !window.L) return;
+  if (mainMap){ try{ mainMap.remove(); }catch{} }
+  const m = L.map(el, { zoomControl:true, attributionControl:true });
+  L.tileLayer(OSM_URL, { maxZoom:19, attribution:OSM_ATTR }).addTo(m);
+  const poly = L.polyline(LA_RUTA_GRABADA, { color:'#1e88e5', weight:5, opacity:.9 }).addTo(m);
+  LA_POINTS.forEach(p => L.marker([p.lat, p.lng], { icon:poiIcon(p) }).addTo(m).on('click', () => openPointSheet(p.id)));
+  m.fitBounds(poly.getBounds().pad(0.12));
+  mainMap = m; userMarkerMain = null;
+  setTimeout(() => { try{ m.invalidateSize(); }catch{} }, 150);
+  updateUserMarker();
+}
+function initZoneMap(zoneId){
+  const el = $('#zonemap'); if (!el || !window.L) return;
+  const p = pointById(zoneId); if (!p) return;
+  if (zoneMap){ try{ zoneMap.remove(); }catch{} }
+  const m = L.map(el, { zoomControl:false, attributionControl:false, scrollWheelZoom:false });
+  L.tileLayer(OSM_URL, { maxZoom:19 }).addTo(m);
+  L.polyline(LA_RUTA_GRABADA, { color:'#1e88e5', weight:4, opacity:.65 }).addTo(m);
+  L.marker([p.lat, p.lng], { icon:poiIcon(p) }).addTo(m);
+  m.setView([p.lat, p.lng], 15);
+  zoneMap = m; userMarkerZone = null;
+  setTimeout(() => { try{ m.invalidateSize(); }catch{} }, 150);
+  updateUserMarker();
+}
+function updateUserMarker(){
+  if (!state.pos || !window.L) return;
+  const ll = [state.pos.lat, state.pos.lng];
+  if (mainMap){ userMarkerMain ? userMarkerMain.setLatLng(ll) : (userMarkerMain = L.marker(ll, { icon:userIcon() }).addTo(mainMap)); }
+  if (zoneMap){ userMarkerZone ? userMarkerZone.setLatLng(ll) : (userMarkerZone = L.marker(ll, { icon:userIcon() }).addTo(zoneMap)); }
+}
+
 AFTER.mapa = () => {
-  $$('.map-point').forEach(g => g.onclick = () => openPointSheet(g.dataset.point));
+  initMainMap();
   $$('[data-route]').forEach(c => c.onclick = () => openRouteSheet(c.dataset.route));
   const sg = $('#startGuided'); if (sg) sg.onclick = () => go('enruta');
   requestGeo();               // activa GPS y pinta el "tú estás aquí"
@@ -945,7 +988,7 @@ function onGeo(p){
     if (d > pt.geofence * 1.6) state.alertedNow.delete(pt.id);  // re-armar al alejarse
   });
   if (txt && nearest) txt.innerHTML = `${state.lang==='en'?'':'a '}<b>${fmtDist(nd)}</b> ${state.lang==='en'?'from':'de'} ${esc(ptTr(nearest,'nombre').split('(')[0].trim())}`;
-  positionUserDot(nearest, nd);
+  updateUserMarker();
 
   // lector de posición del modo En Ruta
   const erGps = $('#erGps');

@@ -12,7 +12,7 @@ window.LA_POINTS = [
   {
     id: 'isla-pinguinos',
     nombre: 'Isla de los Pingüinos (Islote Pájaro Niño)',
-    lat: -33.3865, lng: -71.6720,
+    lat: -33.3625, lng: -71.6840,
     tipo: 'Santuario de la Naturaleza',
     proteccion: 'exclusion',
     geofence: 300,
@@ -34,7 +34,7 @@ window.LA_POINTS = [
   {
     id: 'punta-penablanca',
     nombre: 'Punta Peñablanca',
-    lat: -33.4083, lng: -71.7042,
+    lat: -33.3650, lng: -71.6942,
     tipo: 'Acantilado costero',
     proteccion: 'observacion',
     geofence: 150,
@@ -45,7 +45,7 @@ window.LA_POINTS = [
   {
     id: 'mirador-canelo',
     nombre: 'Mirador El Canelo',
-    lat: -33.3819, lng: -71.6806,
+    lat: -33.3697, lng: -71.6826,
     tipo: 'Punto de observación',
     proteccion: 'libre',
     geofence: 120,
@@ -64,6 +64,17 @@ window.LA_POINTS = [
     resumen: 'Bosque nativo esclerófilo con sendero habilitado.',
     destino_travesia: false
   }
+];
+
+/* --- Ruta grabada del recorrido (loop Algarrobo) --------------------------- */
+/* Trazado reconstruido sobre coordenadas reales (Relive de Inty). El guiado    */
+/* virtual sigue esta ruta. Reemplazable por un GPX real más adelante.          */
+window.LA_RUTA_GRABADA = [
+  [-33.3525, -71.6655], [-33.3560, -71.6685], [-33.3595, -71.6720], [-33.3610, -71.6775],
+  [-33.3625, -71.6840], [-33.3640, -71.6905], [-33.3650, -71.6942], [-33.3672, -71.6895],
+  [-33.3690, -71.6850], [-33.3697, -71.6826], [-33.3735, -71.6820], [-33.3781, -71.6816],
+  [-33.3768, -71.6745], [-33.3730, -71.6705], [-33.3692, -71.6681], [-33.3655, -71.6688],
+  [-33.3610, -71.6690], [-33.3560, -71.6675], [-33.3525, -71.6655]
 ];
 
 /* --- Rutas ---------------------------------------------------------------- */

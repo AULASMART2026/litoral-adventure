@@ -103,6 +103,15 @@ body{
 /* ---------- Mapa ---------- */
 .map-wrap{background:var(--la-card);border:1px solid var(--la-line);border-radius:var(--la-radius);overflow:hidden;box-shadow:var(--la-shadow);margin-bottom:14px}
 .map-svg{display:block;width:100%;height:auto;background:linear-gradient(180deg,#dff0f4,#cfe8ef)}
+
+/* ---- Mapas reales (Leaflet) ---- */
+.leafmap{height:360px;width:100%;position:relative;z-index:0;background:#dfeef2}
+.zonemap{height:230px;width:100%;position:relative;z-index:0;background:#dfeef2}
+.poi-mark,.user-mark{background:none;border:none}
+.poi-pin{font-size:23px;line-height:1;text-align:center;filter:drop-shadow(0 2px 3px rgba(0,0,0,.45))}
+.user-pin{width:16px;height:16px;border-radius:50%;background:#1e88e5;border:3px solid #fff;box-shadow:0 0 0 3px rgba(30,136,229,.4)}
+.leaflet-container{font:inherit}
+.leaflet-control-attribution{font-size:9px}
 .map-point{cursor:pointer}
 .map-point circle.hit{fill:transparent}
 .gps-readout{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--la-ink-2);padding:10px 14px;border-top:1px solid var(--la-line)}
