@@ -49,7 +49,9 @@ const state = {
   lastAlientoIdx: -1,      // para no repetir frase seguida
   recorridoActivo: false,  // ¿ya pasó la charla del guía y empezó el recorrido?
   pendingFoto: null,       // foto (dataURL) pendiente de guardar en el cuaderno
-  lang: (localStorage.getItem('la_lang') || 'es')  // idioma: 'es' | 'en'
+  lang: (localStorage.getItem('la_lang') || 'es'),  // idioma: 'es' | 'en'
+  voiceName: (localStorage.getItem('la_voice') || ''),        // voz elegida
+  energetico: (localStorage.getItem('la_voz_energia') !== '0') // guía enérgico/carismático
 };
 
 /* Redimensiona y comprime una foto a JPEG pequeño (para caber en localStorage) */
@@ -82,14 +84,26 @@ const TTS = {
   on: true,
   voice: null,
   supported: ('speechSynthesis' in window),
+  voicesFor(lang){
+    if (!TTS.supported) return [];
+    const pre = lang === 'en' ? /^en/i : /^es/i;
+    return speechSynthesis.getVoices().filter(v => pre.test(v.lang));
+  },
   pickForLang(){
     if (!TTS.supported) return;
     const vs = speechSynthesis.getVoices();
+    // 1) voz elegida por el usuario (si existe y coincide con el idioma)
+    if (state.voiceName){
+      const chosen = vs.find(v => v.name === state.voiceName);
+      const pre = state.lang === 'en' ? /^en/i : /^es/i;
+      if (chosen && pre.test(chosen.lang)){ TTS.voice = chosen; return; }
+    }
+    // 2) auto por idioma (es-CL / doblaje latino / etc.)
     if (state.lang === 'en'){
       TTS.voice = vs.find(v => /en[-_](US|GB|AU)/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
     } else {
-      TTS.voice = vs.find(v => /es[-_]CL/i.test(v.lang))
-               || vs.find(v => /es[-_](419|MX|US|AR|PE)/i.test(v.lang))
+      TTS.voice = vs.find(v => /es[-_](MX|419)/i.test(v.lang))   // doblaje neutro latino primero
+               || vs.find(v => /es[-_](US|CL|AR|PE)/i.test(v.lang))
                || vs.find(v => /^es/i.test(v.lang)) || null;
     }
   },
@@ -98,14 +112,19 @@ const TTS = {
     TTS.pickForLang();
     speechSynthesis.onvoiceschanged = () => TTS.pickForLang();
   },
-  speak(text){
-    if (!TTS.supported || !TTS.on) return;
+  speak(text, opts){
+    if (!TTS.supported || !TTS.on) return null;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     if (TTS.voice) u.voice = TTS.voice;
     u.lang = (TTS.voice && TTS.voice.lang) || (state.lang === 'en' ? 'en-US' : 'es-CL');
-    u.rate = 0.97; u.pitch = 1;
+    // enérgico/carismático: más ágil y expresivo
+    u.rate  = state.energetico ? 1.08 : 0.98;
+    u.pitch = state.energetico ? 1.12 : 1.0;
+    u.volume = 1;
+    if (opts && opts.onend) u.onend = opts.onend;
     speechSynthesis.speak(u);
+    return u;
   },
   stop(){ if (TTS.supported) speechSynthesis.cancel(); }
 };
@@ -201,6 +220,7 @@ const modeRadius = pt => pt.geofence * (state.mode === 'bici' ? 2.6 : 1);
    ROUTER
    ============================================================================ */
 function go(view){
+  if (typeof simRunning !== 'undefined' && simRunning && view !== 'mapa') stopSimulation();
   if (typeof cleanupMaps === 'function') cleanupMaps();   // libera mapas Leaflet del view anterior
   state.view = view;
   $$('.tab').forEach(t => t.classList.toggle('is-active', t.dataset.view === view));
@@ -271,7 +291,8 @@ VIEWS.mapa = () => {
       <span>📍</span><span>${t('ubicacion')}: <b id="gpsText">${t('activando_gps')}</b></span>
     </div>
   </div>
-  <button class="btn" id="startGuided" style="margin-bottom:14px">${t('iniciar_guiado')}</button>
+  <button class="btn" id="startGuided" style="margin-bottom:10px">${t('iniciar_guiado')}</button>
+  <button class="btn secondary" id="simMapBtn" style="margin-bottom:14px">🎬 ${state.lang==='en'?'Simulate full tour (demo)':'Simular recorrido completo (demo)'}</button>
   <div class="legend">
     <span><i style="background:#1e88e5"></i>${state.lang==='en'?'Recorded route':'Ruta del recorrido'}</span>
     <span>📍 ${state.lang==='en'?'Points of interest':'Puntos de interés'}</span>
@@ -310,6 +331,7 @@ VIEWS.enruta = () => {
         <button data-mode="bici" class="${state.mode==='bici'?'on':''}">${t('en_bici')}</button>
       </div>
       <button class="voice-toggle ${TTS.on?'on':''}" id="voiceToggle" aria-label="Voz">${TTS.on?'🔊':'🔇'}</button>
+      <button class="voice-toggle" id="voicePick" aria-label="Elegir voz">🎙️</button>
     </div>
 
     <div class="progress-card">
@@ -679,10 +701,103 @@ function updateUserMarker(){
   if (zoneMap){ userMarkerZone ? userMarkerZone.setLatLng(ll) : (userMarkerZone = L.marker(ll, { icon:userIcon() }).addTo(zoneMap)); }
 }
 
+/* ===== Simulación del recorrido completo (demo con voz) ===== */
+let simRunning = false;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function speakAsync(text){
+  return new Promise(res => {
+    if (!TTS.on || !TTS.supported){ setTimeout(res, Math.min(4500, 900 + text.length*32)); return; }
+    let done = false; const finish = () => { if (!done){ done = true; res(); } };
+    TTS.speak(text, { onend: finish });
+    setTimeout(finish, 2000 + text.length*95);   // respaldo si onend no dispara
+  });
+}
+function densifyRoute(route, stepM){
+  const out = [];
+  for (let i = 0; i < route.length-1; i++){
+    const A = route[i], B = route[i+1];
+    const d = haversine(A[0],A[1],B[0],B[1]);
+    const n = Math.max(1, Math.round(d/stepM));
+    for (let k = 0; k < n; k++) out.push([A[0]+(B[0]-A[0])*k/n, A[1]+(B[1]-A[1])*k/n]);
+  }
+  out.push(route[route.length-1]);
+  return out;
+}
+function stopSimulation(){
+  simRunning = false;
+  TTS.stop();
+  const cap = $('#simCaption'); if (cap) cap.remove();
+}
+async function startSimulation(){
+  if (simRunning) return;
+  const L18 = state.lang === 'en';
+  state.recorridoActivo = true;
+  go('mapa');
+  await sleep(750);                     // esperar init del mapa
+  simRunning = true;
+  const wrap = $('.map-wrap');
+  if (wrap && !$('#simCaption')){
+    const cap = document.createElement('div');
+    cap.className = 'sim-caption'; cap.id = 'simCaption';
+    cap.innerHTML = `<p id="simText"></p><button class="btn secondary small" id="simStop">■ ${L18?'Stop':'Detener'}</button>`;
+    wrap.appendChild(cap);
+    $('#simStop').onclick = stopSimulation;
+  }
+  const setCap = txt => { const el = $('#simText'); if (el) el.textContent = txt; };
+
+  const path = densifyRoute(LA_RUTA_GRABADA, 70);
+  const onroute = LA_POINTS.map(p => {
+    let best = Infinity, idx = 0;
+    path.forEach((pt,i) => { const d = haversine(pt[0],pt[1],p.lat,p.lng); if (d < best){ best = d; idx = i; } });
+    return { p, idx, dist: best };
+  }).filter(x => x.dist < 500).sort((a,b) => a.idx - b.idx);
+
+  if (mainMap){ try{ mainMap.setView(path[0], 14, {animate:false}); }catch{} }
+  if (mainMap && !userMarkerMain) userMarkerMain = L.marker(path[0], { icon:userIcon() }).addTo(mainMap);
+
+  setCap(L18?'Welcome! Starting the guided tour…':'¡Bienvenido! Empezamos el recorrido guiado…');
+  await speakAsync(L18
+    ? 'Welcome aboard! I am your guide. Let’s discover this coast together, with care and respect. Let’s go!'
+    : '¡Bienvenido a bordo! Soy tu guía. Vamos a descubrir esta costa juntos, con respeto y cuidado. ¡Vamos allá!');
+  if (!simRunning) return;
+
+  let poiPtr = 0, lastAliento = 0;
+  for (let i = 0; i < path.length; i++){
+    if (!simRunning) return;
+    const ll = path[i];
+    if (userMarkerMain) userMarkerMain.setLatLng(ll);
+    if (mainMap && i % 3 === 0){ try{ mainMap.panTo(ll, {animate:true, duration:0.3}); }catch{} }
+
+    if (poiPtr < onroute.length && i >= onroute[poiPtr].idx){
+      const zp = onroute[poiPtr].p;
+      const narr = narrOf(zp.id) || ptTr(zp,'resumen');
+      state.currentZone = zp.id;
+      setCap(`📍 ${ptTr(zp,'nombre').split('(')[0].trim()}`);
+      await speakAsync(narr); if (!simRunning) return;
+      const ind = indOf(zp.id);
+      if (ind && ind.cuidado){ setCap('💚 ' + ind.cuidado); await speakAsync(ind.cuidado); if (!simRunning) return; }
+      poiPtr++; lastAliento = i;
+    } else if (i - lastAliento >= 22){
+      lastAliento = i;
+      const fr = alientoList()[Math.floor(Math.random()*alientoList().length)].frase;
+      setCap('💪 ' + fr);
+      await speakAsync(fr); if (!simRunning) return;
+    } else {
+      await sleep(110);
+    }
+  }
+  setCap(L18?'That’s the tour! Thanks for caring for this place. 🌊':'¡Ese es el recorrido! Gracias por cuidar este lugar. 🌊');
+  await speakAsync(L18
+    ? 'And that is our tour. Thank you for exploring with respect. See you soon on the coast!'
+    : 'Y ese es nuestro recorrido. Gracias por explorar con respeto y cuidado. ¡Nos vemos pronto en la costa!');
+  stopSimulation();
+}
+
 AFTER.mapa = () => {
   initMainMap();
   $$('[data-route]').forEach(c => c.onclick = () => openRouteSheet(c.dataset.route));
   const sg = $('#startGuided'); if (sg) sg.onclick = () => go('enruta');
+  const smb = $('#simMapBtn'); if (smb) smb.onclick = () => startSimulation();
   requestGeo();               // activa GPS y pinta el "tú estás aquí"
 };
 
@@ -712,6 +827,8 @@ function enrutaIntroHTML(){
         <p class="muted">${t('antes_partir_p')}</p>
       </div>
       <button class="btn" id="comenzarRecorrido">${t('comenzar')}</button>
+      <button class="btn secondary" id="simularRecorrido" style="margin-top:10px">🎬 ${state.lang==='en'?'Simulate full tour (demo)':'Simular recorrido completo (demo)'}</button>
+      <button class="btn secondary" id="voicePick2" style="margin-top:10px">🎙️ ${state.lang==='en'?'Choose guide voice':'Elegir voz del guía'}</button>
       <button class="btn secondary" id="verCodigo" style="margin-top:10px">${t('ver_codigo')}</button>
     </div>`;
 }
@@ -730,6 +847,38 @@ function openQRSheet(){
   $$('.qr-box').forEach(el => {
     try { new QRCode(el, { text: el.dataset.qr, width: 150, height: 150, correctLevel: QRCode.CorrectLevel.M }); }
     catch { el.textContent = 'QR no disponible'; }
+  });
+}
+
+function openVoiceSheet(){
+  const vs = TTS.voicesFor(state.lang);
+  const sample = state.lang === 'en' ? 'Hi! I am your Litoral Adventure guide. Ready to explore?'
+                                     : '¡Hola! Soy tu guía en Litoral Adventure. ¿Vamos a explorar la costa?';
+  const rows = vs.length ? vs.map(v => {
+    const latino = /es[-_](MX|419|US)/i.test(v.lang);
+    const sel = v.name === state.voiceName;
+    return `<div class="voice-row ${sel?'sel':''}" data-voice="${esc(v.name)}">
+      <div style="flex:1"><b>${esc(v.name)}</b><br><small>${esc(v.lang)}${latino?' · doblaje latino 🎬':''}</small></div>
+      <button class="btn secondary small" data-test="${esc(v.name)}">▶ Probar</button>
+    </div>`;
+  }).join('') : `<p class="muted">Este dispositivo no expone voces; se usará la voz por defecto del sistema. En Chrome de escritorio suelen aparecer más voces (incluida es-MX).</p>`;
+  openSheet(`<h2>🎙️ ${state.lang==='en'?'Guide voice':'Voz del guía'}</h2>
+    <p class="muted">${state.lang==='en'?'Pick the voice you like best. Ones marked 🎬 are neutral Latin “dubbing” style.':'Elige la voz que más te guste. Las marcadas 🎬 son estilo doblaje latino (películas).'}</p>
+    <label class="voice-energy"><input type="checkbox" id="voiceEnergy" ${state.energetico?'checked':''}> <span>${state.lang==='en'?'Energetic & charismatic guide':'Guía enérgico y carismático'}</span></label>
+    <div class="voice-list">${rows}</div>
+    <div class="btn-row"><button class="btn" onclick="closeSheet()">${state.lang==='en'?'Done':'Listo'}</button></div>`);
+  const en = $('#voiceEnergy');
+  if (en) en.onchange = () => { state.energetico = en.checked; localStorage.setItem('la_voz_energia', en.checked?'1':'0'); TTS.speak(sample); };
+  $$('[data-test]').forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    const v = TTS.voicesFor(state.lang).find(x => x.name === b.dataset.test);
+    if (v){ TTS.voice = v; TTS.speak(sample); }
+  });
+  $$('.voice-row').forEach(r => r.onclick = () => {
+    state.voiceName = r.dataset.voice; localStorage.setItem('la_voice', state.voiceName);
+    TTS.pickForLang();
+    $$('.voice-row').forEach(x => x.classList.toggle('sel', x === r));
+    TTS.speak(state.lang==='en'?'Great choice!':'¡Buena elección! Con esta voz te acompaño en el recorrido.');
   });
 }
 
@@ -841,9 +990,12 @@ AFTER.enruta = () => {
   if (!state.recorridoActivo){
     const cr = $('#comenzarRecorrido'); if (cr) cr.onclick = () => startRecorrido();
     const vc = $('#verCodigo'); if (vc) vc.onclick = () => openCodigoSheet();
+    const sr = $('#simularRecorrido'); if (sr) sr.onclick = () => startSimulation();
+    const vp2 = $('#voicePick2'); if (vp2) vp2.onclick = () => openVoiceSheet();
     return;
   }
   wireZonePanel();
+  const vp = $('#voicePick'); if (vp) vp.onclick = () => openVoiceSheet();
   const seg = $('#modeSeg');
   if (seg) seg.addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (b){ state.mode = b.dataset.mode; go('enruta'); } });
   const vt = $('#voiceToggle');

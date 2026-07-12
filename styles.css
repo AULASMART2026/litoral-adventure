@@ -101,7 +101,21 @@ body{
 .quick small{color:var(--la-ink-2);font-size:12px}
 
 /* ---------- Mapa ---------- */
-.map-wrap{background:var(--la-card);border:1px solid var(--la-line);border-radius:var(--la-radius);overflow:hidden;box-shadow:var(--la-shadow);margin-bottom:14px}
+.map-wrap{background:var(--la-card);border:1px solid var(--la-line);border-radius:var(--la-radius);overflow:hidden;box-shadow:var(--la-shadow);margin-bottom:14px;position:relative}
+
+/* Subtítulos de la simulación (sobre el mapa) */
+.sim-caption{position:absolute;left:0;right:0;bottom:0;z-index:5;background:linear-gradient(0deg,rgba(11,43,51,.94),rgba(11,43,51,.72));color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px;animation:dropIn .3s ease}
+.sim-caption p{flex:1;font-size:14px;line-height:1.4;margin:0}
+.sim-caption .btn{flex:0 0 auto;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4)}
+
+/* Selector de voces */
+.voice-energy{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#fff6df,#fdeec1);border:1px solid #f0dca0;border-radius:12px;padding:12px;margin:8px 0 12px;cursor:pointer}
+.voice-energy input{width:18px;height:18px;flex:0 0 auto}
+.voice-list{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto}
+.voice-row{display:flex;align-items:center;gap:10px;background:var(--la-bg);border:1.5px solid var(--la-line);border-radius:12px;padding:10px 12px;cursor:pointer}
+.voice-row.sel{border-color:var(--la-deep);background:#eef6f8}
+.voice-row b{font-size:13px}
+.voice-row small{font-size:11px;color:var(--la-ink-2)}
 .map-svg{display:block;width:100%;height:auto;background:linear-gradient(180deg,#dff0f4,#cfe8ef)}
 
 /* ---- Mapas reales (Leaflet) ---- */
