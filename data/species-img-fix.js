@@ -1,6 +1,5 @@
-/* Correcciones de imágenes (reemplazo de mapas/dibujos por fotos reales).
-   jurel y corvina no tienen buena foto en Commons (dieron dibujo/papeleta):
-   se anulan y muestran el emoji 🐟. */
+/* Correcciones de imágenes (revisadas a ojo, una por una).
+   Reemplazos por fotos reales; sin foto válida en Commons -> source vacío = emoji. */
 window.LA_IMG = Object.assign(window.LA_IMG||{}, {
  "peumo": {
   "credit": "Patricio Novoa Quezada from Valparaíso, Chile",
@@ -27,6 +26,45 @@ window.LA_IMG = Object.assign(window.LA_IMG||{}, {
   "license": "CC0",
   "source": "https://commons.wikimedia.org/wiki/File:Mugil%20cephalus%20leaping.jpg"
  },
- "corvina": { "source": "" },
- "jurel":   { "source": "" }
+ "corvina": {
+  "source": ""
+ },
+ "jurel": {
+  "source": ""
+ },
+ "robalo": {
+  "credit": "Leonel Roget",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File%3AEleginops%20maclovinus%206830057.jpg"
+ },
+ "anchoveta": {
+  "credit": "cstobie",
+  "license": "CC BY 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File%3AEngraulis%20ringens%20Peru.jpg"
+ },
+ "estrella-de-mar": {
+  "credit": "Scott Loarie",
+  "license": "CC0",
+  "source": "https://commons.wikimedia.org/wiki/File%3AStichaster%20striatus%20660323.jpg"
+ },
+ "lagarto-lloron": {
+  "credit": "Lauchaseca",
+  "license": "CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File%3ALiolaemus%20Chiliensis.jpg"
+ },
+ "sardina-comun": {
+  "source": ""
+ },
+ "pez-rollizo": {
+  "source": ""
+ },
+ "jaiba-mora": {
+  "source": ""
+ },
+ "raton-pelo-largo": {
+  "source": ""
+ },
+ "pulpo": {
+  "source": ""
+ }
 });
